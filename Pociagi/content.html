@@ -1,0 +1,2426 @@
+﻿<!DOCTYPE html>
+<html lang="pl">
+<head>
+
+
+    <!-- InMobi Choice. Consent Manager Tag v3.0 (for TCF 2.2) -->
+    <script type="text/javascript" async=true>(function() {
+			  var host = window.location.hostname;
+			  var element = document.createElement('script');
+			  var firstScript = document.getElementsByTagName('script')[0];
+			  var url = 'https://cmp.inmobi.com'
+					  .concat('/choice/', 'H4qhzffR317Eu', '/', host, '/choice.js?tag_version=V3');
+			  var uspTries = 0;
+			  var uspTriesLimit = 3;
+			  element.async = true;
+			  element.type = 'text/javascript';
+			  element.src = url;
+
+			  firstScript.parentNode.insertBefore(element, firstScript);
+
+			  function makeStub() {
+				  var TCF_LOCATOR_NAME = '__tcfapiLocator';
+				  var queue = [];
+				  var win = window;
+				  var cmpFrame;
+
+				  function addFrame() {
+					  var doc = win.document;
+					  var otherCMP = !!(win.frames[TCF_LOCATOR_NAME]);
+
+					  if (!otherCMP) {
+						  if (doc.body) {
+							  var iframe = doc.createElement('iframe');
+
+							  iframe.style.cssText = 'display:none';
+							  iframe.name = TCF_LOCATOR_NAME;
+							  doc.body.appendChild(iframe);
+						  } else {
+							  setTimeout(addFrame, 5);
+						  }
+					  }
+					  return !otherCMP;
+				  }
+
+				  function tcfAPIHandler() {
+					  var gdprApplies;
+					  var args = arguments;
+
+					  if (!args.length) {
+						  return queue;
+					  } else if (args[0] === 'setGdprApplies') {
+						  if (
+								  args.length > 3 &&
+								  args[2] === 2 &&
+								  typeof args[3] === 'boolean'
+						  ) {
+							  gdprApplies = args[3];
+							  if (typeof args[2] === 'function') {
+								  args[2]('set', true);
+							  }
+						  }
+					  } else if (args[0] === 'ping') {
+						  var retr = {
+							  gdprApplies: gdprApplies,
+							  cmpLoaded: false,
+							  cmpStatus: 'stub'
+						  };
+
+						  if (typeof args[2] === 'function') {
+							  args[2](retr);
+						  }
+					  } else {
+						  if(args[0] === 'init' && typeof args[3] === 'object') {
+							  args[3] = Object.assign(args[3], { tag_version: 'V3' });
+						  }
+						  queue.push(args);
+					  }
+				  }
+
+				  function postMessageEventHandler(event) {
+					  var msgIsString = typeof event.data === 'string';
+					  var json = {};
+
+					  try {
+						  if (msgIsString) {
+							  json = JSON.parse(event.data);
+						  } else {
+							  json = event.data;
+						  }
+					  } catch (ignore) {}
+
+					  var payload = json.__tcfapiCall;
+
+					  if (payload) {
+						  window.__tcfapi(
+								  payload.command,
+								  payload.version,
+								  function(retValue, success) {
+									  var returnMsg = {
+										  __tcfapiReturn: {
+											  returnValue: retValue,
+											  success: success,
+											  callId: payload.callId
+										  }
+									  };
+									  if (msgIsString) {
+										  returnMsg = JSON.stringify(returnMsg);
+									  }
+									  if (event && event.source && event.source.postMessage) {
+										  event.source.postMessage(returnMsg, '*');
+									  }
+								  },
+								  payload.parameter
+						  );
+					  }
+				  }
+
+				  while (win) {
+					  try {
+						  if (win.frames[TCF_LOCATOR_NAME]) {
+							  cmpFrame = win;
+							  break;
+						  }
+					  } catch (ignore) {}
+
+					  if (win === window.top) {
+						  break;
+					  }
+					  win = win.parent;
+				  }
+				  if (!cmpFrame) {
+					  addFrame();
+					  win.__tcfapi = tcfAPIHandler;
+					  win.addEventListener('message', postMessageEventHandler, false);
+				  }
+			  };
+
+			  makeStub();
+
+			  function makeGppStub() {
+				  const CMP_ID = 10;
+				  const SUPPORTED_APIS = [
+					  '2:tcfeuv2',
+					  '6:uspv1',
+					  '7:usnatv1',
+					  '8:usca',
+					  '9:usvav1',
+					  '10:uscov1',
+					  '11:usutv1',
+					  '12:usctv1'
+				  ];
+
+				  window.__gpp_addFrame = function (n) {
+					  if (!window.frames[n]) {
+						  if (document.body) {
+							  var i = document.createElement("iframe");
+							  i.style.cssText = "display:none";
+							  i.name = n;
+							  document.body.appendChild(i);
+						  } else {
+							  window.setTimeout(window.__gpp_addFrame, 10, n);
+						  }
+					  }
+				  };
+				  window.__gpp_stub = function () {
+					  var b = arguments;
+					  __gpp.queue = __gpp.queue || [];
+					  __gpp.events = __gpp.events || [];
+
+					  if (!b.length || (b.length == 1 && b[0] == "queue")) {
+						  return __gpp.queue;
+					  }
+
+					  if (b.length == 1 && b[0] == "events") {
+						  return __gpp.events;
+					  }
+
+					  var cmd = b[0];
+					  var clb = b.length > 1 ? b[1] : null;
+					  var par = b.length > 2 ? b[2] : null;
+					  if (cmd === "ping") {
+						  clb(
+								  {
+									  gppVersion: "1.1", // must be “Version.Subversion”, current: “1.1”
+									  cmpStatus: "stub", // possible values: stub, loading, loaded, error
+									  cmpDisplayStatus: "hidden", // possible values: hidden, visible, disabled
+									  signalStatus: "not ready", // possible values: not ready, ready
+									  supportedAPIs: SUPPORTED_APIS, // list of supported APIs
+									  cmpId: CMP_ID, // IAB assigned CMP ID, may be 0 during stub/loading
+									  sectionList: [],
+									  applicableSections: [-1],
+									  gppString: "",
+									  parsedSections: {},
+								  },
+								  true
+						  );
+					  } else if (cmd === "addEventListener") {
+						  if (!("lastId" in __gpp)) {
+							  __gpp.lastId = 0;
+						  }
+						  __gpp.lastId++;
+						  var lnr = __gpp.lastId;
+						  __gpp.events.push({
+							  id: lnr,
+							  callback: clb,
+							  parameter: par,
+						  });
+						  clb(
+								  {
+									  eventName: "listenerRegistered",
+									  listenerId: lnr, // Registered ID of the listener
+									  data: true, // positive signal
+									  pingData: {
+										  gppVersion: "1.1", // must be “Version.Subversion”, current: “1.1”
+										  cmpStatus: "stub", // possible values: stub, loading, loaded, error
+										  cmpDisplayStatus: "hidden", // possible values: hidden, visible, disabled
+										  signalStatus: "not ready", // possible values: not ready, ready
+										  supportedAPIs: SUPPORTED_APIS, // list of supported APIs
+										  cmpId: CMP_ID, // list of supported APIs
+										  sectionList: [],
+										  applicableSections: [-1],
+										  gppString: "",
+										  parsedSections: {},
+									  },
+								  },
+								  true
+						  );
+					  } else if (cmd === "removeEventListener") {
+						  var success = false;
+						  for (var i = 0; i < __gpp.events.length; i++) {
+							  if (__gpp.events[i].id == par) {
+								  __gpp.events.splice(i, 1);
+								  success = true;
+								  break;
+							  }
+						  }
+						  clb(
+								  {
+									  eventName: "listenerRemoved",
+									  listenerId: par, // Registered ID of the listener
+									  data: success, // status info
+									  pingData: {
+										  gppVersion: "1.1", // must be “Version.Subversion”, current: “1.1”
+										  cmpStatus: "stub", // possible values: stub, loading, loaded, error
+										  cmpDisplayStatus: "hidden", // possible values: hidden, visible, disabled
+										  signalStatus: "not ready", // possible values: not ready, ready
+										  supportedAPIs: SUPPORTED_APIS, // list of supported APIs
+										  cmpId: CMP_ID, // CMP ID
+										  sectionList: [],
+										  applicableSections: [-1],
+										  gppString: "",
+										  parsedSections: {},
+									  },
+								  },
+								  true
+						  );
+					  } else if (cmd === "hasSection") {
+						  clb(false, true);
+					  } else if (cmd === "getSection" || cmd === "getField") {
+						  clb(null, true);
+					  }
+					  //queue all other commands
+					  else {
+						  __gpp.queue.push([].slice.apply(b));
+					  }
+				  };
+				  window.__gpp_msghandler = function (event) {
+					  var msgIsString = typeof event.data === "string";
+					  try {
+						  var json = msgIsString ? JSON.parse(event.data) : event.data;
+					  } catch (e) {
+						  var json = null;
+					  }
+					  if (typeof json === "object" && json !== null && "__gppCall" in json) {
+						  var i = json.__gppCall;
+						  window.__gpp(
+								  i.command,
+								  function (retValue, success) {
+									  var returnMsg = {
+										  __gppReturn: {
+											  returnValue: retValue,
+											  success: success,
+											  callId: i.callId,
+										  },
+									  };
+									  event.source.postMessage(msgIsString ? JSON.stringify(returnMsg) : returnMsg, "*");
+								  },
+								  "parameter" in i ? i.parameter : null,
+								  "version" in i ? i.version : "1.1"
+						  );
+					  }
+				  };
+				  if (!("__gpp" in window) || typeof window.__gpp !== "function") {
+					  window.__gpp = window.__gpp_stub;
+					  window.addEventListener("message", window.__gpp_msghandler, false);
+					  window.__gpp_addFrame("__gppLocator");
+				  }
+			  };
+
+			  makeGppStub();
+
+			  var uspStubFunction = function() {
+				  var arg = arguments;
+				  if (typeof window.__uspapi !== uspStubFunction) {
+					  setTimeout(function() {
+						  if (typeof window.__uspapi !== 'undefined') {
+							  window.__uspapi.apply(window.__uspapi, arg);
+						  }
+					  }, 500);
+				  }
+			  };
+
+			  var checkIfUspIsReady = function() {
+				  uspTries++;
+				  if (window.__uspapi === uspStubFunction && uspTries < uspTriesLimit) {
+					  console.warn('USP is not accessible');
+				  } else {
+					  clearInterval(uspInterval);
+				  }
+			  };
+
+			  if (typeof window.__uspapi === 'undefined') {
+				  window.__uspapi = uspStubFunction;
+				  var uspInterval = setInterval(checkIfUspIsReady, 6000);
+			  }
+		  })();</script>
+    <!-- End InMobi Choice. Consent Manager Tag v3.0 (for TCF 2.2) -->
+
+    <script>function createIframe(id, width, height, appendTo, content, style) {
+			  var iframe = document.createElement("iframe");
+			  iframe.setAttribute("id", id);
+			  iframe.setAttribute("width", width);
+			  iframe.setAttribute("height", height);
+			  iframe.setAttribute("frameborder", 0);
+			  iframe.setAttribute("scrolling", "no");
+			  if (style !== "null") {
+				  iframe.setAttribute("style", decodeURI(style));
+			  }
+			  iframe.onload = function() {
+				  document.getElementById(id).contentWindow.document.open();
+				  document.getElementById(id).contentWindow.document.write('<html><body style="margin:0;padding:0;">' + decodeURI(content) + '</body></html>');
+				  document.getElementById(id).contentWindow.document.close();
+			  };
+			  document.getElementById(appendTo).append(iframe);
+		  }</script>
+
+
+
+
+
+    <script async src="https://securepubads.g.doubleclick.net/tag/js/gpt.js"></script>
+    <script type='text/javascript'>window.googletag = window.googletag || {};
+		  window.googletag.cmd = window.googletag.cmd || [];
+		  window.ybConfiguration = window.ybConfiguration || {};
+		  window.ybConfiguration = Object.assign({}, window.ybConfiguration, { integrationMethod: 'open_tag', smartRefreshDisabled: false });
+		  (function (y, i, e, L, D) {
+			  y.Yieldbird = y.Yieldbird || {};
+			  y.Yieldbird.cmd = y.Yieldbird.cmd || [];
+			  i.cmd.push(function () { i.pubads().disableInitialLoad(); });
+			  L = e.createElement('script');
+			  L.async = true;
+			  L.src = '//cdn.qwtag.com/b0e78d62-ad62-475f-8589-db9f9633108f/qw.js';
+			  D = e.getElementsByTagName('script')[0];
+			  (D.parentNode || e.head).insertBefore(L, D);
+		  })(window, window.googletag, document);</script>
+    <!-- To install the qw.js script, copy the following code and paste it immediately into the section of your website, below your GPT code. -->
+
+
+    <script data-ad-client="ca-pub-5681547886297750" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+
+    <title>Internetowa wyszukiwarka połączeń kolejowych</title>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <link rel="apple-touch-icon" sizes="57x57" href="/apple-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="/apple-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/apple-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="/apple-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/apple-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="/apple-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="/apple-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/apple-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/android-icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/manifest.json">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, minimum-scale=1.0">
+
+    <meta name="description" content="Witryna internetowa umożliwiająca wyszukiwanie połączeń kolejowych wszystkich przewoźników w Polsce">
+    <meta name="keywords" content="kolej, pociąg, pociągi, podróżowanie, rozkład jazdy, wyszukiwanie, połączenia kolejowe, PKP SA, Grupa PKP, PKP Intercity, przewoźnicy kolejowi, podróż, turystyka, dworce kolejowe">
+    <link href="/css/bootstrap.min.css?r=625" rel="stylesheet" media="screen">
+    <link href="/css/flexslider.css?r=625" rel="stylesheet" media="screen">
+    <link href="/css/style.css?r=625" rel="stylesheet" media="screen">
+    <link href="/css/header-footer.css?r=625" rel="stylesheet" media="screen">
+    <link href="/css/results.css?r=625" rel="stylesheet" media="screen">
+
+
+    <link href="/css/jquery-ui.css?r=625" rel="stylesheet" media="screen">
+    <link href="/css/print.min.css?r=625" rel="stylesheet" media="print">
+    <link href="/css/print-overrides.min.css?r=625" rel="stylesheet" media="print">
+    <link rel="stylesheet" href="/css/jquery-ui-1.10.3.custom.min.css?r=625" media="screen">
+    <link rel="stylesheet" href="/css/footable.core.min.css?r=625" type="text/css" media="screen">
+    <link rel="stylesheet" href="/css/magnific.min.css?r=625" type="text/css" media="screen">
+    <link rel="stylesheet" href="/css/bootstrap-select.min.css?r=625" type="text/css" media="screen">
+    <link rel="stylesheet" href="/css/wai.css?r=625" type="text/css" media="screen">
+    <link rel="stylesheet" href="/css/bw.min.css?r=625" type="text/css" media="screen">
+
+    <!--[if lt IE 8]>
+            <style type="text/css" media="screen">
+                #header, #content, #footer { display: none !important }
+            </style>
+    <![endif]-->
+
+    <script type="text/javascript">//<![CDATA[
+			window._settings = {
+					'is_windows_phone_os': false,
+  					'is_windows_mobile_os': false,
+  					'is_ie': false,
+  					'is_generic_phone': false,
+  					'is_android': false,
+  					'is_ipad': false,
+  					'is_iphone': false,
+  					'is_tablet': false,
+  					'is_mobile': false,
+  					'is_mm': false,
+  					'is_mt': false
+  			};
+		//]]></script>
+
+
+    <script src="/js/sha256.min.js?r=625"></script>
+    <script src="/js/jquery.js?r=625"></script>
+
+
+    <script src="/js/jquery.validate.js?r=625"></script>
+    <script src="/js/jquery.placeholder.min.js?r=625"></script>
+    <script src="/js/modernizr.custom.43947.js?r=625"></script>
+    <script src="/js/jquery-ui.1.10.4.min.js?r=625"></script>
+    <script src="/js/jquery.flexslider-min.js?r=625"></script>
+    <script src="/js/equalize.js?r=625"></script>
+
+    <script src="/js/icheck.min.js?r=625"></script>
+
+    <script src="/js/jquery.ui.touch-punch.min.js?r=625"></script>
+
+
+    <link rel="stylesheet" href="/css/skins/blue.css?r=625" type="text/css" media="screen">
+    <!-- <link rel="stylesheet" href="/css/skins/green.css" type="text/css" media="screen">
+    <link rel="stylesheet" href="/css/skins/gray.css" type="text/css" media="screen"> -->
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="/js/bootstrap.min.js?r=625"></script>
+
+    <script src="/js/easyResponsiveTabs.min.js?r=625" type="text/javascript"></script>
+
+    <script src="/js/jquery.cookie.min.js?r=625" type="text/javascript"></script>
+    <script src="/js/jquery-meiomask-1.1.13/src/meiomask.min.js?r=625" type="text/javascript"></script>
+    <script src="/js/ftables/footable.min.js?r=625" type="text/javascript"></script>
+    <script src="/js/ftables/footable.sort.min.js?r=625" type="text/javascript"></script>
+    <script src="/js/magnific.js?r=625" type="text/javascript"></script>
+    <script src="/js/bootstrap-select.min.js?r=625" type="text/javascript"></script>
+    <script type="text/javascript">//<![CDATA[
+			var jQ = jQuery;
+
+			window._i18n = {
+				'Proszę uzupełnić stację lub nr pociągu': 'Proszę uzupełnić stację lub nr pociągu',
+				'Proszę uzupełnić stację': 'Proszę uzupełnić stację',
+				'Proszę uzupełnić stację początkową': 'Proszę uzupełnić stację początkową',
+				'Proszę uzupełnić stację docelową': 'Proszę uzupełnić stację docelową',
+				'Pola „z” oraz „do” muszą mieć inne wartości!': 'Pola „z” oraz „do” muszą mieć inne wartości!',
+				'Nowe zapytanie musi się różnić od obecnego': 'Nowe zapytanie musi się różnić od obecnego',
+				'Nie wybrano połączeń. Proszę o wybranie (rozwinięcie) połączeń, które mają być eksportowane do PDF': 'Nie wybrano połączeń w celu ich eksportu do PDF. Proszę o rozwinięcie połączeń, które mają być eksportowane np. poprzez funkcję „Rozwiń wszystkie”.',
+				'Zakup biletu możliwy jest do 30 dni przed terminem podróży.': 'Zakup biletu możliwy jest do 30 dni przed terminem podróży.',
+				'Proszę wybrać przynajmniej jeden środek transportu': 'Proszę wybrać przynajmniej jeden środek transportu',
+
+				_jq_validator : {
+					required: "Pole wymagane.",
+					remote: "Proszę poprawić wartość tego pola.",
+					email: "Prosze podać poprawny adres e-mail.",
+					url: "Proszę wpisać poprawny adres URL.",
+					date: "Proszę podać poprawny format daty .",
+					dateISO: "Proszę podać poprawny format daty (ISO).",
+					number: "Proszę podać liczbę.",
+					digits: "Proszę podać only digits.",
+					creditcard: "Proszę podać poprawny numer karty kredytowej.",
+					equalTo: "Proszę podać the same value again.",
+					accept: "Proszę podać wartość with a valid extension.",
+					maxlength: jQuery.validator.format("Proszę podać no more than {0} characters."),
+					minlength: jQuery.validator.format("Proszę podać at least {0} characters."),
+					rangelength: jQuery.validator.format("Proszę podać wartość od długości znaków pomiędzy {0}, a {1}."),
+					range: jQuery.validator.format("Proszę podać wartość between {0} and {1}."),
+					max: jQuery.validator.format("Proszę podać wartość less than or equal to {0}."),
+					min: jQuery.validator.format("Proszę podać wartość greater than or equal to {0}.")
+				}
+			};
+
+			window.buy_ticket_urls = {
+				'KD': 'https://bilet.kolejedolnoslaskie.eu/sale/hafasSearch',
+				//'LKA': 'https://lka-test.pkpik.pl/sale/hafasSearch'
+				'LKA': 'https://e-bilet.lka.lodzkie.pl/sale/hafasSearch',
+				'IC': 'https://gtr.intercity.pl/przekierowanie.jsp',
+				'KS': 'https://bilet.kolejeslaskie.com/BiletHafas/pp',
+				'bilkom': 'https://bilkom.pl/koszyk/train',
+				'KW': 'https://bilet.wielkopolskiebilety.pl/koszyk/train',
+				'KMal': 'https://bilkom.pl/koszyk/train',
+				'counter': '/buy-ticket/count'
+			};
+
+			window.buy_ticket_days_allowed = 30;
+
+            window.clickonometricsIsMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+            window.station_banners = {"carsharing":[{"code":"5100686","priority":0,"file_name_prefix":"gdynia"},{"code":"5100009","priority":1,"file_name_prefix":"gdansk"},{"code":"5101104","priority":1,"file_name_prefix":"gdansk"},{"code":"5101117","priority":0,"file_name_prefix":"gdansk"},{"code":"5101242","priority":0,"file_name_prefix":"gdansk"},{"code":"5101266","priority":0,"file_name_prefix":"gdansk"},{"code":"5101307","priority":1,"file_name_prefix":"gdansk"},{"code":"5101127","priority":0,"file_name_prefix":"gdansk"},{"code":"5101317","priority":0,"file_name_prefix":"gdansk"},{"code":"5101091","priority":0,"file_name_prefix":"gdynia"},{"code":"5104585","priority":0,"file_name_prefix":"gdynia"},{"code":"5100010","priority":1,"file_name_prefix":"gdynia"},{"code":"5101110","priority":0,"file_name_prefix":"gdynia"},{"code":"5101311","priority":0,"file_name_prefix":"gdynia"},{"code":"5101118","priority":0,"file_name_prefix":"gdynia"},{"code":"5101126","priority":0,"file_name_prefix":"gdynia"},{"code":"5101120","priority":0,"file_name_prefix":"gdynia"},{"code":"5101304","priority":0,"file_name_prefix":"gdynia"},{"code":"5101340","priority":0,"file_name_prefix":"gdynia"},{"code":"5101385","priority":0,"file_name_prefix":"gdynia"},{"code":"5104478","priority":0,"file_name_prefix":"gdynia"},{"code":"5101478","priority":0,"file_name_prefix":"gdynia"},{"code":"5101827","priority":0,"file_name_prefix":"gdynia"},{"code":"5102324","priority":0,"file_name_prefix":"gdynia"},{"code":"5102936","priority":0,"file_name_prefix":"gdynia"},{"code":"5103070","priority":0,"file_name_prefix":"gdynia"},{"code":"5103075","priority":0,"file_name_prefix":"gdynia"},{"code":"5103080","priority":0,"file_name_prefix":"gdynia"},{"code":"5103186","priority":0,"file_name_prefix":"gdynia"},{"code":"5103103","priority":0,"file_name_prefix":"gdynia"},{"code":"5100056","priority":0,"file_name_prefix":"gdynia"},{"code":"5103557","priority":0,"file_name_prefix":"gdynia"},{"code":"5103537","priority":0,"file_name_prefix":"gdynia"},{"code":"5103692","priority":0,"file_name_prefix":"gdynia"},{"code":"5100153","priority":0,"file_name_prefix":"gdynia"},{"code":"5103982","priority":0,"file_name_prefix":"gdynia"},{"code":"5103984","priority":0,"file_name_prefix":"gdynia"},{"code":"5104061","priority":0,"file_name_prefix":"gdynia"},{"code":"5104073","priority":0,"file_name_prefix":"gdynia"},{"code":"5104301","priority":0,"file_name_prefix":"gdynia"}],"parking":[{"code":"5100065","priority":0,"file_name_prefix":"warszawa-centralna"},{"code":"5100066","priority":1,"file_name_prefix":"generic"},{"code":"5196003","priority":1,"file_name_prefix":"generic"},{"code":"5100005","priority":1,"file_name_prefix":"bydgoszcz-glowna"},{"code":"5100230","priority":1,"file_name_prefix":"tarnow"},{"code":"5100172","priority":1,"file_name_prefix":"generic"},{"code":"5100066","priority":1,"file_name_prefix":"generic"},{"code":"5100013","priority":1,"file_name_prefix":"generic"},{"code":"5100009","priority":1,"file_name_prefix":"generic"},{"code":"5196018","priority":1,"file_name_prefix":"generic"},{"code":"5100046","priority":1,"file_name_prefix":"generic"},{"code":"5196027","priority":1,"file_name_prefix":"generic"},{"code":"5100069","priority":1,"file_name_prefix":"generic"},{"code":"5196026","priority":1,"file_name_prefix":"generic"},{"code":"5100025","priority":1,"file_name_prefix":"generic"}]};
+
+
+		//]]></script>
+    <script src="/js/i18n/jquery.ui.datepicker-pl.js?r=625"></script>
+
+    <script>jQ.datepicker.regional['pl'] = {
+			  closeText: 'Zamknij',
+			  prevText: '&#x3c;Poprzedni',
+			  nextText: 'Następny&#x3e;',
+			  currentText: 'Dziś',
+			  monthNames: ['Styczeń','Luty','Marzec','Kwiecień','Maj','Czerwiec',
+				  'Lipiec','Sierpień','Wrzesień','Październik','Listopad','Grudzień'],
+			  monthNamesShort: ['Sty','Lu','Mar','Kw','Maj','Cze',
+				  'Lip','Sie','Wrz','Pa','Lis','Gru'],
+			  dayNames: ['Niedziela','Poniedziałek','Wtorek','Środa','Czwartek','Piątek','Sobota'],
+			  dayNamesShort: ['Nie','Pn','Wt','Śr','Czw','Pt','So'],
+			  dayNamesMin: ['N','Pn','Wt','Śr','Cz','Pt','So'],
+			  weekHeader: 'Tydz',
+			  dateFormat: 'dd.mm.yy',
+			  firstDay: 1,
+			  isRTL: false,
+			  showMonthAfterYear: false,
+			  yearSuffix: ''};
+		  jQ.datepicker.setDefaults(jQ.datepicker.regional['pl']);</script>
+
+    <script src="/js/dates.js?r=625" type="text/javascript"></script>
+    <script src="/js/app.min.js?r=625"></script>
+    <script src="/js/app2.min.js?r=625"></script>
+    <script type="text/javascript"><!--
+//var baseUrl = "http://rozklad-pkp.pl/bin/stboard.exe/pn?";
+var gBaseUrl = "http://rozklad-pkp.pl/bin/query.exe/pn?";
+var gUrlTravelPlannerJSON = "http://rozklad-pkp.pl/bin/query.exe/pn";
+var helpBaseUrl = "http://rozklad-pkp.pl/bin/help.exe/pn?";
+var waitIcon = "http://rozklad-pkp.pl/hafas-res/img/wait_ani.gif";
+var okIcon   = "http://rozklad-pkp.pl/hafas-res/img/ok.gif";
+var cancelIcon   = "http://rozklad-pkp.pl/hafas-res/img/failure.gif";
+var newIcon   = "http://rozklad-pkp.pl/hafas-res/img/new.gif";
+//--></script>
+
+    <script type="text/javascript"><!--
+function startHafasSearch(){
+	input = document.getElementById('hafasQuickSearch').value;
+	//		var matches = "[a-zA-Z0-9äöüÄÖÜß]";
+	if (input.match(/^(.+)-(.+)$/) ){
+		var erg = input.match(/^(.+)-(.+)$/);
+		window.location.href = "/bin/query.exe/pn?S="+erg[1]+"&Z="+erg[2]+"&identifyLocation=1";
+	} else if (input.match(/^\s*(\d+)\s*$/)){
+		var erg = input.match(/^\s*(\d+)\s*$/);
+		window.location.href = "/bin/trainsearch.exe/pn?trainname="+erg[1];
+	} else {
+		var erg = input.match(/^\s*(.+)\s*$/);
+		window.location.href = "/bin/stboard.exe/pn?input="+erg[1]+"&time=08:53";
+	}
+}
+//--></script>
+
+    <script type="text/javascript" src="/hafas-res/js/showhidediv.js?r=625"></script>
+    <script type="text/javascript">jQuery.noConflict();
+function validateEvaNumbersOld(){
+	var fromEvaNr =jQuery( "#from" ).attr("evaNr");
+	var toEvaNr =jQuery( "#to" ).attr("evaNr");
+	var bg = jQuery("#from").css("backgroundColor");
+	//for Opera(?)
+	if(bg == 'transparent'){
+		bg = "#FFFFFF";
+	}
+	if(fromEvaNr != null && fromEvaNr !=''){
+		jQuery("#from").css("color",bg);
+		jQuery("#from").val(fromEvaNr);
+	}
+	if(toEvaNr != null && toEvaNr !=''){
+		jQuery("#to").css("color",bg);
+		jQuery("#to").val(toEvaNr);
+	}
+}</script>
+
+    <!-- BBelements AdServer one2many code -->
+    <link href="/css/map.css?r=625" rel="stylesheet">
+    <link href="/css/arrivals.css" rel="stylesheet" media="screen">
+
+    <!--[if lt IE 9]>
+
+      <script src="/js/html5shiv.js?r=625"></script>
+      <script src="/js/respond.js?r=625"></script>
+
+      <link href="/css/ie8.css?r=625" rel="stylesheet">
+    <![endif]-->
+    <!--[if lt IE 10]>
+      <link href="/css/ie9.css?r=625" rel="stylesheet">
+    <![endif]-->
+
+    <script type="text/javascript">var quickhelps = {"stacja-poczatkowa":"Stacja pocz\u0105tkowa. Po wpisaniu pierwszych liter, system podpowie jej nazw\u0119 oraz zapami\u0119ta ostatnio wyszukiwane miejscowo\u015bci.","stacja-koncowa":"Stacja docelowa. Po wpisaniu pierwszych liter, system podpowie jej nazw\u0119 oraz zapami\u0119ta ostatnio wyszukiwane miejscowo\u015bci.","dodaj-posrednia":"Mo\u017cliwo\u015b\u0107 dodania stacji po\u015bredniej tj. mo\u017cna zaplanowa\u0107 podr\u00f3\u017c z uwzgl\u0119dnieniem np. pobytu w okre\u015blonej miejscowo\u015bci","wybierz-godzine":"Wyb\u00f3r daty i godziny. Dat\u0119 mo\u017cna wybra\u0107 klikaj\u0105c w symbol kalendarza i wybieraj\u0105c okre\u015blony dzie\u0144 lub zmieni\u0107 dat\u0119 pos\u0142uguj\u0105c si\u0119 strza\u0142kami w prawo lub w lewo.","wybierz-date":"Wyb\u00f3r daty odjazdu b\u0105d\u017a przyjazdu poci\u0105gu","nowe-zapytanie":"Wyczy\u015b\u0107 formularz","pola-stacje":"Po\u0142\u0105czenie mo\u017cna wyszuka\u0107 jako bezpo\u015bredni\u0105 relacj\u0119 pomi\u0119dzy dwoma miejscowo\u015bciami lub z wykorzystaniem funkcji \u201eDodaj miejscowo\u015b\u0107 po\u015bredni\u0105\". Wybieraj\u0105c t\u0105 opcj\u0119 mo\u017cna zaplanowa\u0107 podr\u00f3\u017c z przesiadk\u0105 oraz okre\u015bli\u0107  jej czas.","pola-czas":"Godzin\u0119 mo\u017cna wpisa\u0107 z klawiatury klikaj\u0105c na pole godziny lub zmieni\u0107 j\u0105 pos\u0142uguj\u0105c si\u0119 strza\u0142kami godzin\/minut. Podr\u00f3\u017c mo\u017cna zaplanowa\u0107 podaj\u0105c godzin\u0119 odjazdu ze stacji pocz\u0105tkowej lub godzin\u0119 przyjazdu do stacji docelowej.","pola-opcje-dodatkowe":"Wyb\u00f3r dodatkowych opcji po\u0142\u0105czenia - opcje dodatkowe pozwalaj\u0105 na dok\u0142adniejsze dostosowanie po\u0142\u0105czenia do swoich potrzeb.  Mo\u017cliwy jest mi\u0119dzy innymi wyb\u00f3r po\u0142\u0105czenia bezpo\u015bredniego, poci\u0105gu z miejscem dla os\u00f3b z dzie\u0107mi i\/lub przewozem roweru oraz okre\u015blenie po\u0142\u0105czenia ze wzgl\u0119du na rodzaj transportu lub przewo\u017anika.","pomoc-polecamy":"Informacje istotne z punktu widzenia pasa\u017cera.","pomoc-aktualnosci":"Informacje o us\u0142ugach, udogodnieniach, danych teleadresowych dworc\u00f3w kolejowych nale\u017c\u0105cych do PKP S.A.","pomoc-rozklad":"rozklad-pkp.pl pozwala na wyszukiwania po\u0142\u0105czenia: mi\u0119dzy dwoma stacjami np. z opcj\u0105 podr\u00f3\u017cy przez stacj\u0119 po\u015bredni\u0105, wg stacji odjazdu\/przyjazdu (tablica odjazd\u00f3w i przyjazd\u00f3w) oraz wed\u0142ug numer\u00f3w poci\u0105g\u00f3w. Mo\u017cna tak\u017ce zaplanowa\u0107 podr\u00f3\u017c wskazuj\u0105c miejsce na mapie. System zapami\u0119ta ostatnio wyszukiwane miejscowo\u015bci.","pomoc-utrudnienia":"Dzi\u0119ki specjalnej mapie mo\u017cna zapozna\u0107 si\u0119 z aktualn\u0105 sytuacj\u0105 na liniach kolejowych. Informacje r\u00f3wnocze\u015bnie s\u0105 prezentowane w wynikach wyszukiwania.","pomoc-dla-pasazera":"Tutaj publikowane s\u0105 wiadomo\u015bci u\u0142atwiaj\u0105ce podr\u00f3\u017cowanie kolej\u0105 takie jak informacje o przewo\u017anikach, aplikacjach mobilnych, mapach linii kolejowych, itd.","pomoc-dworce":"Opisy najwa\u017cniejszych dworc\u00f3w kolejowych w Polsce wraz z ich mapami, punktami us\u0142ugowymi, histori\u0105 itd.","pomoc-aplikacje-mobilne":"Opis aplikacji mobilnej Bilkom zawieraj\u0105cej dane ze strony rozklad-pkp.pl i umo\u017cliwiaj\u0105cej planowanie podr\u00f3\u017cy kolej\u0105","pomoc-kontakt":"Dane teleadresowe przewo\u017anik\u00f3w kolejowych w Polsce.","polaczenie-bezposrednie":"Po\u0142\u0105czenie bezpo\u015brednie","przewoz-rowerow":"Przew\u00f3z rower\u00f3w","niepelnosprawni":"U\u0142atwienia dla os\u00f3b niepe\u0142nosprawnych","dzieci":"U\u0142atwienia dla os\u00f3b z dzie\u0107mi","sq-stacja":"Nazwa stacji","sq-wybierz-godzine":"Wybierz godzin\u0119 odjazdu lub przyjazdu poci\u0105gu","ts-wybierz-date":"Wybierz dat\u0119","stacja":"Wybierz nazw\u0119 stacji","nr-pociagu":"Podaj numer poci\u0105gu","sq-wybierz-date":"Wybierz dat\u0119 odjazdu lub przyjazdu poci\u0105gu","sq-pola-stacja":"Wpisz stacj\u0119","sq-pola-czas":"Podaj czas odjazdu lub przyjazdu","sq-pola-opcje-dodatkowe":"Ustaw opcje dodatkowe","ts-pola-czas":"Podaj czas odjazdu lub przyjazdu","ts-pola-stacja":"Podaj stacj\u0119","ts-pola-linia":"Podaj numer poci\u0105gu","ts-nowe-zapytanie":"Wyczy\u015b\u0107 formularz","sq-nowe-zapytanie":"Wyczy\u015b\u0107 formularz","pomoc-przewoznicy":"Lista przewo\u017anik\u00f3w, kt\u00f3rych dane publikowane s\u0105 na stronie rozk\u0142adu wraz z numerami infolinii i adresami stron internetowych."};</script>
+
+
+
+</head>
+<body class=" mode-sq culture-pl no-mobile    ">
+
+    <style>
+        .anchor_close {
+            cursor: pointer;
+            color: #b2b2b2;
+            border: 1px solid #b2b2b2;
+            border-radius: 100%;
+            background: #fff;
+            line-height: 20px;
+            font-size: 20px;
+            font-family: arial,sans-serif;
+            position: absolute;
+            top: 5px;
+            right: 13px;
+            height: 22px;
+            width: 22px;
+        }
+
+            .anchor_close:hover {
+                color: #fff;
+                background-color: #b2b2b2;
+            }
+
+        @media only screen and (max-width: 400px) {
+            .anchor_close {
+                top: -40px;
+                right: 5px;
+                font-size: 16px;
+                border-radius: 0;
+            }
+        }
+    </style>
+    <div>
+        <script async src="https://securepubads.g.doubleclick.net/tag/js/gpt.js"></script>
+        <script>var googletag = googletag || {};
+			googletag.cmd = googletag.cmd || [];</script>
+        <script>var gptAdSlots = [];
+			googletag.cmd.push(function () {
+				var mapping_anchor = googletag.sizeMapping().
+				addSize([1024, 0], [[728, 90], [970, 90]]).
+				addSize([750, 0], [728, 90]).
+				addSize([0, 0], [[320, 100], [320, 50]]).
+				build();
+
+				gptAdSlots[0] = googletag.defineSlot('/52555387,22528334154/rozklad-pkp.pl_anchor_ad', [[728, 90], [970, 90], [320, 100], [320, 50]], 'anchor_ad')
+						.defineSizeMapping(mapping_anchor)
+						.setCollapseEmptyDiv(true,true)
+						.setTargeting('pos', ['anchor'])
+						.addService(googletag.pubads());
+				googletag.enableServices();
+			});</script>
+    </div>
+    <!-- /52555387,22528334154/rozklad-pkp.pl_anchor_ad -->
+    <div id="yb_anchor_wrapper" style="position: fixed; bottom: 0px; z-index: 9999999; width: 100%; background-color: rgba(255, 255, 255, 0.8); border-top: 1px solid #d3d3d3; text-align: center; left: 0;">
+        <div id='anchor_ad'>
+
+            <script>googletag.cmd.push(function() { googletag.display('anchor_ad'); });</script>
+        </div><span class="anchor_close" onclick="
+                            var body = document.body,
+                                html = document.documentElement,
+                                anchor = document.getElementById('yb_anchor_wrapper'),
+                                height = Math.max( body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight );
+                                anchor.style.position = 'absolute';
+                                anchor.style.top = height + 'px';
+                                anchor.style.bottom = '';
+                                this.style.display = 'none';
+
+                        ">
+            x
+
+        </span>
+    </div>
+
+
+    <!-- ########## HEADER ########## -->
+    <!-- Google Tag Manager -->
+    <noscript>
+        <iframe src="//www.googletagmanager.com/ns.html?id=GTM-54383G"
+                height="0" width="0" style="display:none;visibility:hidden"></iframe>
+    </noscript>
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-54383G');</script>
+    <!-- End Google Tag Manager -->
+
+    <noscript>
+        <div class="nocompat-msg-bg">&nbsp;</div>
+        <div class="nocompat-msg">
+            <h1>Do działania tej strony wymagana jest włączona obsługa języka javascript w przeglądarce.</h1>
+        </div>
+    </noscript>
+    <!--[if lt IE 8]>
+            <div class="nocompat-msg-bg">&nbsp;</div>
+            <div class="nocompat-msg">
+                <h1>Twoja przeglądarka jest przestarzała!</h1>
+                <h3>Polecamy pobrać najnowszą wersję którejś z poniższych:</h3>
+                <table class="table">
+                    <tr>
+                        <td><a href="http://www.mozilla.org/pl/firefox/new/"><img src="/img/browsers/firefox.png" alt="Pobierz przeglądarkę Firefox"/></a></td>
+                        <td><a href="http://www.google.pl/intl/pl/chrome/"><img src="/img/browsers/chrome.png" alt="Pobierz przeglądarkę Google Chrome"/></a></td>
+                        <td><a href="http://windows.microsoft.com/pl-pl/internet-explorer/download-ie"><img src="/img/browsers/ie.png" alt="Pobierz przeglądarkę Internet Explorer"/></a></td>
+                        <td><a href="http://www.opera.com/pl/"><img src="/img/browsers/opera.png" alt="Pobierz przeglądarkę Opera"/></a></td>
+                    </tr>
+                    <tr>
+                        <td><a href="http://www.mozilla.org/pl/firefox/new/">Firefox</a></td>
+                        <td><a href="http://www.google.pl/intl/pl/chrome/">Google Chrome</a></td>
+                        <td><a href="http://windows.microsoft.com/pl-pl/internet-explorer/download-ie">Internet Explorer</a></td>
+                        <td><a href="http://www.opera.com/pl/">Opera</a></td>
+                    </tr>
+                </table>
+            </div>
+    <![endif]-->
+
+
+
+    <ul class="nav-wcag">
+        <li><a href="#menu-glowne" tabindex="1">Przejdź do menu głównego</a></li>
+        <li><a href="#wyszukiwarka-wyniki" tabindex="2">Przejdź wyszukiwarki pociągów</a></li>
+        <li><a href="#wyniki" tabindex="3">Przejdź do wyników wyszukiwania</a></li>
+        <li><a href="#stopka" tabindex="4">Przejdź do stopki</a></li>
+    </ul>
+    <h1 class="wcag-hide">Rozkład Jazdy PKP - wyniki wyszukiwania</h1>
+
+    <!-- ANDROID -->
+    <!-- /.bilkom row -->
+    <!-- ANDROID -->
+
+    <div id="header">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="row">
+                        <div class="col-1">
+                            <a href="/" class="logo-wrap"><img src="/img/header/logo_white.png" alt="rozkład-pkp.pl | rozkład dla każdego pasażera" class="img-responsive logo" /></a>
+                            <img src="/img/header/kir.png" style="display: none" alt="" class="kir">
+                        </div><!-- col-1 -->
+                        <div class="col-2">
+                            <div class="navigation">
+                                <h2 class="wcag-hide" id="menu-glowne" tabindex="0">Menu główne</h2>
+                                <div class="f-row f-row--right">
+                                    <div class="mobi-menu not-active btn-pkp visible-xs visible-sm">
+                                        <span class="dash-menu"></span>
+                                        <span class="dash-menu"></span>
+                                        <span class="dash-menu"></span>
+                                        <span class="mobi-menu-label">MENU</span>
+                                    </div><!-- logo-pkp btn-pkp -->
+
+                                    <ul class="wcag-flat wcag-flat--langs">
+                                        <li>
+                                            <a href="/" class="lang pl btn-pkp btn-pkp--header" lang="pl"><span>PL</span></a><!-- logo-pkp btn-pkp -->
+                                        </li>
+                                        <li>
+                                            <a href="/de" class="lang de btn-pkp btn-pkp--header" lang="de"><span>DE</span></a><!-- logo-pkp btn-pkp -->
+                                        </li>
+                                        <li>
+                                            <a href="/en" class="lang en btn-pkp btn-pkp--header" lang="en"><span>EN</span></a><!-- logo-pkp btn-pkp -->
+                                        </li>
+                                        <li>
+                                            <a href="/ru" class="lang ru btn-pkp btn-pkp--header" lang="ru"><span>RU</span></a><!-- logo-pkp btn-pkp -->
+                                        </li>
+                                        <li>
+                                            <a href="/ua" class="lang ua btn-pkp btn-pkp--header" lang="ua"><span>UA</span></a><!-- logo-pkp btn-pkp -->
+                                        </li>
+                                    </ul>
+
+                                    <ul class="wcag-flat wcag-flat--accessibility">
+                                        <li>
+                                            <a href="#" class="font-size btn-pkp btn-pkp--header btn-pkp--font no-underline hidden-xs">
+                                                <span>A</span><sup>+</sup>
+                                            </a><!-- logo-pkp btn-pkp -->
+                                        </li>
+                                        <li>
+                                            <a href="#" class="font-size- btn-pkp btn-pkp--header btn-pkp--font no-underline hidden-xs">
+                                                <span>A</span><sup>-</sup>
+                                            </a><!-- logo-pkp btn-pkp -->
+                                        </li>
+                                        <li>
+                                            <a href="#" class="dl btn-pkp btn-pkp--header btn-pkp--contrast hidden-xs">
+                                                <img src="/img/header/contrast_ico.png" alt="Przełącz na wersję kontrastową" class="img-responsive" />
+                                                <img src="/img/header/contrast_ico_hover.png" alt="Przełącz na wersję kontrastową" class="img-responsive img-hover" />
+                                            </a><!-- logo-pkp btn-pkp -->
+                                        </li>
+                                    </ul>
+
+                                    <div class="search search--header btn-pkp hidden-xs">
+                                        <h2 class="wcag-hide" tabindex="0">Wyszukiwarka</h2>
+                                        <form action="/pl/global-search" method="get">
+                                            <label for="search-content" class="wcag-hide">Szukaj w serwisie</label>
+                                            <input type="text" id="search-content" class="form-control search" name="phrase" placeholder="Szukaj w serwisie…">
+                                            <button type="submit"><img src="/img/header/search_ico.png" alt="Szukaj" class="img-responsive" /></button>
+                                        </form>
+                                    </div><!-- logo-pkp btn-pkp -->
+                                </div><!-- f-row -->
+
+                                <div class="list-wrapp">
+                                    <ul class="list-flat">
+                                        <li class="wcag-hide no-outline" aria-hidden="true" tabindex="0"></li>
+
+                                        <li class="item1  " tabindex="0">
+                                            <div class="nav-item btn-pkp btn-pkp--header-menu">
+                                                <span class="link">
+                                                    <span class="square visible-xs visible-sm"></span>
+                                                    <span class="menu-triangle-padding">ROZKŁAD JAZDY</span>
+                                                </span><!-- link -->
+                                            </div><!-- nav-item btn-pkp -->
+                                            <ul class="sublist">
+
+                                                <li class="subitem1 ">
+                                                    <div class="nav-item btn-pkp">
+                                                        <a href="/pl/" class="link">
+                                                            <span class="square visible-xs visible-sm"></span>
+                                                            <span>WYSZUKAJ POŁĄCZENIE</span>
+                                                        </a><!-- link -->
+                                                    </div><!-- nav-item btn-pkp -->
+                                                </li>
+
+                                                <li class="subitem2 ">
+                                                    <div class="nav-item btn-pkp">
+                                                        <a href="/pl/sq" class="link">
+                                                            <span class="square visible-xs visible-sm"></span>
+                                                            <span>WYSZUKAJ ZE STACJI</span>
+                                                        </a><!-- link -->
+                                                    </div><!-- nav-item btn-pkp -->
+                                                </li>
+
+                                                <li class="subitem3 hidden-mobile">
+                                                    <div class="nav-item btn-pkp">
+                                                        <a href="/pl/ts" class="link">
+                                                            <span class="square visible-xs visible-sm"></span>
+                                                            <span>WYSZUKAJ POCIĄG</span>
+                                                        </a><!-- link -->
+                                                    </div><!-- nav-item btn-pkp -->
+                                                </li>
+
+                                                <li class="subitem4 ">
+                                                    <div class="nav-item btn-pkp">
+                                                        <a href="http://old.rozklad-pkp.pl" class="link">
+                                                            <span class="square visible-xs visible-sm"></span>
+                                                            <span>POPRZEDNIA WERSJA SERWISU</span>
+                                                        </a><!-- link -->
+                                                    </div><!-- nav-item btn-pkp -->
+                                                </li>
+                                            </ul>
+                                        </li>
+
+                                        <li class="item2  " tabindex="0">
+                                            <div class="nav-item btn-pkp btn-pkp--header-menu">
+                                                <span class="link">
+                                                    <span class="square visible-xs visible-sm"></span>
+                                                    <span class="menu-triangle-padding">DLA PASAŻERA</span>
+                                                </span><!-- link -->
+                                            </div><!-- nav-item btn-pkp -->
+                                            <ul class="sublist">
+
+                                                <li class="subitem1 ">
+                                                    <div class="nav-item btn-pkp">
+                                                        <a href="/pl/news" class="link">
+                                                            <span class="square visible-xs visible-sm"></span>
+                                                            <span>AKTUALNOŚCI</span>
+                                                        </a><!-- link -->
+                                                    </div><!-- nav-item btn-pkp -->
+                                                </li>
+
+                                                <li class="subitem2 ">
+                                                    <div class="nav-item btn-pkp">
+                                                        <a href="https://www.pkp.pl/pl/kontakt/przewoznicy-kolejowi" class="link">
+                                                            <span class="square visible-xs visible-sm"></span>
+                                                            <span>NASI PRZEWOŹNICY</span>
+                                                        </a><!-- link -->
+                                                    </div><!-- nav-item btn-pkp -->
+                                                </li>
+
+                                                <li class="subitem3 ">
+                                                    <div class="nav-item btn-pkp">
+                                                        <a href="http://www.pkp.pl/pl/bez-barier" class="link">
+                                                            <span class="square visible-xs visible-sm"></span>
+                                                            <span>BEZ BARIER</span>
+                                                        </a><!-- link -->
+                                                    </div><!-- nav-item btn-pkp -->
+                                                </li>
+
+                                                <li class="subitem4 ">
+                                                    <div class="nav-item btn-pkp">
+                                                        <a href="http://www.pkp.pl/pl/dworce/bezpieczenstwo" class="link">
+                                                            <span class="square visible-xs visible-sm"></span>
+                                                            <span>BEZPIECZEŃSTWO</span>
+                                                        </a><!-- link -->
+                                                    </div><!-- nav-item btn-pkp -->
+                                                </li>
+
+                                                <li class="subitem5 ">
+                                                    <div class="nav-item btn-pkp">
+                                                        <a href="http://www.pkp.pl/pl/dworce/infodworce" class="link">
+                                                            <span class="square visible-xs visible-sm"></span>
+                                                            <span>INFODWORCE</span>
+                                                        </a><!-- link -->
+                                                    </div><!-- nav-item btn-pkp -->
+                                                </li>
+
+                                                <li class="subitem6 ">
+                                                    <div class="nav-item btn-pkp">
+                                                        <a href="http://www.pkp.pl/pl/dworce/wi-fi-na-dworcach" class="link">
+                                                            <span class="square visible-xs visible-sm"></span>
+                                                            <span>WI-FI NA DWORCACH W POLSCE</span>
+                                                        </a><!-- link -->
+                                                    </div><!-- nav-item btn-pkp -->
+                                                </li>
+
+                                                <li class="subitem7 ">
+                                                    <div class="nav-item btn-pkp">
+                                                        <a href="https://www.pkp.pl/pl/dworce/sklepy-uslugi" class="link">
+                                                            <span class="square visible-xs visible-sm"></span>
+                                                            <span>SKLEPY I USŁUGI NA DWORCACH</span>
+                                                        </a><!-- link -->
+                                                    </div><!-- nav-item btn-pkp -->
+                                                </li>
+                                            </ul>
+                                        </li>
+
+                                        <li class="item3  ">
+                                            <div class="nav-item btn-pkp btn-pkp--header-menu">
+                                                <a href="http://www.pkp.pl/pl/dworce/nasze-dworce" class="link">
+                                                    <span class="square visible-xs visible-sm"></span>
+                                                    <span>DWORCE</span>
+                                                </a><!-- link -->
+                                            </div><!-- nav-item btn-pkp -->
+                                        </li>
+
+                                        <li class="item4  ">
+                                            <div class="nav-item btn-pkp btn-pkp--header-menu">
+                                                <a href="/pl/page/mobilne" class="link">
+                                                    <span class="square visible-xs visible-sm"></span>
+                                                    <span>APLIKACJA MOBILNA</span>
+                                                </a><!-- link -->
+                                            </div><!-- nav-item btn-pkp -->
+                                        </li>
+
+                                        <li class="item5  ">
+                                            <div class="nav-item btn-pkp btn-pkp--header-menu">
+                                                <a href="/pl/page/kontakt" class="link">
+                                                    <span class="square visible-xs visible-sm"></span>
+                                                    <span>POMOC</span>
+                                                </a><!-- link -->
+                                            </div><!-- nav-item btn-pkp -->
+                                        </li>
+                                    </ul>
+                                </div>
+
+                                <!-- /.list-wrapp -->
+
+                            </div><!-- navigation -->
+                        </div><!-- col-2 -->
+                    </div><!-- row -->
+                </div><!-- col-md-12 -->
+            </div><!-- row -->
+        </div><!-- container -->
+    </div><!-- header -->
+    <!-- ########## HEADER ########## -->
+    <!-- ########## BN ########## -->
+    <div class="bn">
+        <img class="bn-img" src="/img/content/bg/bn-na.png" alt="">
+        <img class="bn-img780" src="/img/content/bg/bn-na_780.png" alt="">
+        <img class="bn-img480" src="/img/content/bg/bn-na_480.png" alt="">
+    </div>
+    <!-- ########## BN ########## -->
+    <!-- ########## CONTENT MAIN ########## -->
+    <div id="content" class="results arrivals">
+
+        <span id="focus"></span>
+        <!-- main_adv_top reklama_gorna (display 1249271) -->
+        <div class="adv adv-center adv-top">
+            <div id="main_adv_top"></div>
+            <script type="text/javascript" src="//static.clickonometrics.pl/_a4a.js"></script>
+            <script type="text/javascript">jQuery(document).ready(function () {
+            if (!window.clickonometricsIsMobile) {
+                if (typeof window.__tcfapi === "function") {
+                    const callback1249271 = (tcData, success) => {
+                        if (success && tcData.eventStatus === 'useractioncomplete' || tcData.eventStatus === 'tcloaded') {
+                            window.__tcfapi('removeEventListener', 2, () => {
+                            }, tcData.listenerId);
+                            var consentData = '';
+                            if (success) {
+                                if (tcData.gdprApplies) {
+                                    consentData = tcData.tcString;
+                                }
+                                if (consentData == null) {
+                                    return;
+                                }
+
+                                var settings = {
+                                    container: 'main_adv_top',
+                                    keywords: window.adv_keywords,
+                                    gdpr_consent: consentData,
+                                    use_iframe: '1'
+                                };
+                                _A4A.construct("https://delivery.clickonometrics.pl");
+                                _A4A.handle(_A4A.CODE_PLACEMENT, [1249271, settings]);
+
+                                _A4A.addEventListener('SlotRenderEnded', 1249271,
+                                    function (event) {
+                                        if (!event.hasAd) {
+                                            googletag.cmd.push(function() {  googletag.defineSlot('/52555387,22528334154/rozklad-pkp.pl_sw_970x250_top', [[728, 90], [750, 100], [750, 200], [750, 300], [970, 90], [970, 250]], 'div-gpt-ad-rozklad-pkp.pl_sw_970x250_top').addService(googletag.pubads());googletag.enableServices();});
+                                            googletag.cmd.push(function() {
+                                                googletag.display('div-gpt-ad-rozklad-pkp.pl_sw_970x250_top');
+                                            });
+                                        }
+                                        (function(w,d,s,p,i){w[p]=w[p]||[];w[p].push({'id':i});e=d.createElement(s);e.src='https://delivery.clickonometrics.pl/service=3969/tm.json?sid=3969&cid=122&pid=15760';document.head.appendChild(e);})(window,document,'script','ccxtgSettings','3969');
+                                    }
+                                );
+                            }
+                        }
+                    }
+                    window.__tcfapi('addEventListener', 2, callback1249271);
+                }
+            }
+        });</script>
+            <div id="div-gpt-ad-rozklad-pkp.pl_sw_970x250_top"></div>
+        </div>
+
+
+
+
+        <div class="container">
+            <div class="row results-box">
+                <div class="col-md-12">
+
+                    <!-- main_adv_left reklama_boczna_lewa (display 1249275) -->
+                    <div class="adv adv-left">
+                        <div id="main_adv_left"></div>
+                        <script type="text/javascript" src="//static.clickonometrics.pl/_a4a.js"></script>
+                        <script type="text/javascript">jQuery(document).ready(function () {
+            if (!window.clickonometricsIsMobile) {
+                if (typeof window.__tcfapi === "function") {
+                    const callback1249275 = (tcData, success) => {
+                        if (success && tcData.eventStatus === 'useractioncomplete' || tcData.eventStatus === 'tcloaded') {
+                            window.__tcfapi('removeEventListener', 2, () => {
+                            }, tcData.listenerId);
+                            var consentData = '';
+                            if (success) {
+                                if (tcData.gdprApplies) {
+                                    consentData = tcData.tcString;
+                                }
+                                if (consentData == null) {
+                                    return;
+                                }
+
+                                var settings = {
+                                    container: 'main_adv_left',
+                                    keywords: window.adv_keywords,
+                                    gdpr_consent: consentData,
+                                    use_iframe: '1',
+                                    iframe_style: 'float:right;'
+                                };
+                                _A4A.construct("https://delivery.clickonometrics.pl");
+                                _A4A.handle(_A4A.CODE_PLACEMENT, [1249275, settings]);
+
+                                _A4A.addEventListener('SlotRenderEnded', 1249275,
+                                    function (event) {
+                                        if (!event.hasAd) {
+                                            googletag.cmd.push(function() {  googletag.defineSlot('/52555387,22528334154/rozklad-pkp.pl_sw_160x600_left', [[160, 600],[300, 600]], 'div-gpt-ad-rozklad-pkp.pl_sw_160x600_left').addService(googletag.pubads());googletag.enableServices();});
+                                            googletag.cmd.push(function() {
+                                                googletag.display('div-gpt-ad-rozklad-pkp.pl_sw_160x600_left');
+                                            });
+                                        }
+                                    }
+                                );
+                            }
+                        }
+                    }
+                    window.__tcfapi('addEventListener', 2, callback1249275);
+                }
+            }
+        });</script>
+                        <div id="div-gpt-ad-rozklad-pkp.pl_sw_160x600_left"></div>
+                    </div>
+                    <!-- main_adv_right reklama_boczna_prawa (display 1249276) -->
+                    <div class="adv adv-right">
+                        <div id="main_adv_right"></div>
+                        <script type="text/javascript" src="//static.clickonometrics.pl/_a4a.js"></script>
+                        <script type="text/javascript">jQuery(document).ready(function () {
+            if (!window.clickonometricsIsMobile) {
+                if (typeof window.__tcfapi === "function") {
+                    const callback1249276 = (tcData, success) => {
+                        if (success && tcData.eventStatus === 'useractioncomplete' || tcData.eventStatus === 'tcloaded') {
+                            window.__tcfapi('removeEventListener', 2, () => {
+                            }, tcData.listenerId);
+                            var consentData = '';
+                            if (success) {
+                                if (tcData.gdprApplies) {
+                                    consentData = tcData.tcString;
+                                }
+                                if (consentData == null) {
+                                    return;
+                                }
+
+                                var settings = {
+                                    container: 'main_adv_right',
+                                    keywords: window.adv_keywords,
+                                    gdpr_consent: consentData,
+                                    use_iframe: '1'
+                                };
+                                _A4A.construct("https://delivery.clickonometrics.pl");
+                                _A4A.handle(_A4A.CODE_PLACEMENT, [1249276, settings]);
+
+                                _A4A.addEventListener('SlotRenderEnded', 1249276,
+                                    function (event) {
+                                        if (!event.hasAd) {
+                                            googletag.cmd.push(function() {  googletag.defineSlot('/52555387,22528334154/rozklad-pkp.pl_sw_160x600_right', [[160, 600],[300, 600]], 'div-gpt-ad-rozklad-pkp.pl_sw_160x600_right').addService(googletag.pubads());googletag.enableServices();});
+                                            googletag.cmd.push(function() {
+                                                googletag.display('div-gpt-ad-rozklad-pkp.pl_sw_160x600_right');
+                                            });
+                                        }
+                                    }
+                                );
+                            }
+                        }
+                    }
+                    window.__tcfapi('addEventListener', 2, callback1249276);
+                }
+            }
+        });</script>
+                        <div id="div-gpt-ad-rozklad-pkp.pl_sw_160x600_right"></div>
+                    </div>
+
+
+
+
+
+
+                    <script type="text/javascript"><!--
+if (typeof window.localStorage === "undefined") {
+window.localStorage = {};
+}
+window.localStorage.tTime = "Czas";
+window.localStorage.tLine = "Kurs";
+window.localStorage.tRT = "Op&#243;&#378;nienie";
+window.localStorage.tDirection = "Kierunek";
+window.localStorage.tWait = "Prosz&#281; czeka&#263; ...";
+window.localStorage.tError = "B&#322;&#261;d";
+window.localStorage.tTryAgain = "Pr&#243;buj od nowa";
+window.localStorage.tTitleTimetableDeparture = "Odjazdy";
+window.localStorage.tTitleTimetableArrival = "Przyjazdy"
+//--></script>
+                    <div class="row">
+                        <div class="wcag-outline-wrp"><h2 class="wcag-hide">Wyszukiwarka po&#322;&#261;cze&#324; kolejowych - ze stacji</h2></div>
+                        <form action="/pl/sq?ld=mobil&amp;" name="sq_query" method="get" class="form-horizontal miniform" onsubmit="return validateMiniform('sq')">
+                            <input type="hidden" name="maxJourneys" value="10">
+                            <input type="hidden" name="start" value="yes">
+                            <input type="hidden" name="dirInput" value="">
+                            <input type="hidden" name="GUIREQProduct_0" value="on">
+                            <input type="hidden" name="GUIREQProduct_1" value="on">
+                            <input type="hidden" name="GUIREQProduct_2" value="on">
+                            <input type="hidden" name="GUIREQProduct_3" value="on">
+                            <input type="hidden" name="advancedProductMode" value="">
+                            <input type="hidden" name="boardType" value="dep">
+                            <!-- ########## CONTENT SEARCH ########## -->
+                            <div class="search" id="wyszukiwarka-wyniki" tabindex="0">
+                                <div class="col-1">
+                                    <div class="input-group input-group--table active">
+                                        <div class="d-table">
+                                            <div class="input-group-addon--fix input-group-addon--fix-from upper">
+                                                <img src="/img/content/icons/main/from.png" alt="">Z:
+                                            </div>
+                                            <fieldset>
+                                                <label for="wcag-from" class="wcag-hide">Stacja / Przystanek</label>
+                                                <input id="wcag-from" type="text" name="input" class="form-control form-control--switch station-autocomplete" placeholder="Bydgoszcz Politechnika">
+                                                <input type="hidden" name="input" value="Bydgoszcz Politechnika">
+                                            </fieldset>
+                                        </div>
+                                        <div class="input-group__description">
+                                            <div>Wpisz nazw&#281; stacji</div>
+                                        </div>
+                                    </div><!-- input-group -->
+                                </div>
+                                <!-- /.col-1 -->
+                                <div class="col-3">
+                                    <!-- ########## DATE ########## -->
+                                    <div class="row">
+                                        <button type="button" class="left btn-pkp-reverse">
+                                            <img src="/img/content/icons/arrow-left-4.png" class="center" alt="Dzie&#324; wcze&#347;niej" />
+                                        </button>
+                                        <div class="data-filed" aria-live="polite" aria-atomic="true">
+                                            <span class="day-number">&nbsp;</span><!-- day-number -->
+                                            <span class="day-name">&nbsp;</span><!-- day-name -->
+                                            <span class="day-month">&nbsp;</span><!-- day-month -->
+                                            <span class="day-year">&nbsp;</span><!-- day-year -->
+                                        </div><!-- data-field -->
+                                        <button type="button" class="right btn-pkp-reverse">
+                                            <img src="/img/content/icons/arrow-right-4.png" class="center" alt="Dzie&#324; p&#243;&#378;niej" />
+                                        </button>
+                                    </div><!-- row -->
+                                    <!-- ########## DATE ########## -->
+                                </div>
+                                <!-- /.col-3 -->
+                                <div class="col-4">
+                                    <!-- ########## HOUR ########## -->
+                                    <div class="row">
+                                        <div class="btn-group-vertical hours">
+                                            <ul class="wcag-flat">
+                                                <li>
+                                                    <button type="button" class="left btn btn-time-up">
+                                                        <img src="/img/content/icons/arrow-up-5.png" class="center" alt="Godzin&#281; wcze&#347;niej" />
+                                                    </button>
+                                                </li>
+                                                <li>
+                                                    <button type="button" class="left btn btn-down-up">
+                                                        <img src="/img/content/icons/arrow-down-5.png" class="center" alt="Godzin&#281; p&#243;&#378;niej" />
+                                                    </button>
+                                                </li>
+                                            </ul>
+                                            <!-- /.wcag-flat -->
+                                        </div><!-- btn-group-vertical hours -->
+                                        <div class="data-field">
+                                            <fieldset>
+                                                <label for="hour" class="wcag-hide">
+                                                    Godzina odjazdu
+                                                </label>
+                                                <input id="hour" type="text" class="day-hour form-control" placeholder="23:59"><!-- day-hour -->
+                                            </fieldset>
+                                        </div><!-- data-field -->
+                                        <div class="btn-group-vertical minutes">
+                                            <ul class="wcag-flat">
+                                                <li>
+                                                    <button type="button" class="left btn btn-time-up">
+                                                        <img src="/img/content/icons/arrow-up-5.png" class="center" alt="1 minut wcze&#347;niej" />
+                                                    </button>
+                                                </li>
+                                                <li>
+                                                    <button type="button" class="left btn btn-down-up">
+                                                        <img src="/img/content/icons/arrow-down-5.png" class="center" alt="1 minut p&#243;&#378;niej" />
+                                                    </button>
+                                                </li>
+                                            </ul>
+                                        </div><!-- btn-group-vertical minutes -->
+                                    </div><!-- row -->
+                                    <!-- ########## HOUR ########## -->
+                                </div>
+                                <!-- /.col-4 -->
+                                <div class="col-5">
+                                    <div class="row">
+                                        <button type="submit" class="new-search">
+                                            <span class="upcase">Wyszukaj</span>
+                                            <img src="/img/header/search_ico.png" alt="" />
+                                        </button>
+                                    </div>
+                                    <!-- /.row -->
+                                </div>
+                                <!-- /.col-5 -->
+                            </div><!-- col-1 -->
+                            <!-- ########## CONTENT SEARCH ########## -->
+                        </form>
+                    </div>
+                    <!-- /.row -->
+                    <!-- ########## CONTENT NAV-TOP ########## -->
+                    <ul class="row nav-top wcag-flat">
+                        <li class="col-md-4 col-sm-4 col-xs-5">
+                        </li>
+                        <!-- /.col-md-4 col-sm-4 col-xs-4 -->
+                        <!-- /.col-md-4 col-sm-2 col-xs-2 -->
+                        <li class="col-md-4 col-sm-4 col-xs-4 pull-right">
+                            <a href="#pozniejsze-polaczenia" class="later-connections sq">
+                                <div class="wrapp">
+                                    <span class="upcase bolder">P&#243;&#378;niejsze po&#322;&#261;czenia</span>
+                                </div><!-- wrapp -->
+                                <img src="/img/content/icons/arrow-right-2.png" alt="" />
+                            </a><!-- earlier-connections -->
+                        </li>
+                        <!-- /.col-md-4 col-sm-4 col-xs-4 pull-right -->
+                        <li class="col-md-6 col-sm-12 col-xs-12">
+                            <p>
+                                <span class="timetable-info ">
+                                    Rozk&#322;ad jazdy:
+                                    18.01.25 - 19.01.25,
+                                    Odjazdy (23:59 - 19:03)
+                                </span>
+                            </p>
+                        </li>
+                    </ul>
+                    <!-- /.row -->
+                    <!-- ########## CONTENT NAV-TOP ########## -->
+                    <div class="row result-container sq-results">
+                        <div class="wcag-outline-wrp"><h2 class="wcag-hide">Wyszukiwarka po&#322;&#261;cze&#324; kolejowych - ze stacji</h2></div>
+                        <table class="f-table table" id="wyniki" tabindex="0">
+                            <caption class="wcag-hide">Wyszukiwarka po&#322;&#261;cze&#324; kolejowych - ze stacji</caption>
+                            <thead>
+                                <tr>
+                                    <th data-sort-ignore="true" data-hide="desktop,tablet,phone"ę
+                                    </th>
+                                    <th data-sort-ignore="true" data-ignore="highlight" data-hide="">Czas</th>
+                                    <th data-sort-ignore="true">Kurs</th>
+                                    <th data-sort-ignore="true" class="timetable-column">W kierunku</th>
+                                    <th data-sort-ignore="true" data-hide="sphone,mphone">Peron<br />/&nbsp;tor</th>
+                                    <th data-hide="sphone,mphone" class="superhide"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="odd">
+                                    <td>
+                                        <span class="footable-toggle"></span>
+                                        <span class="zwin">zwi&#324;</span>
+                                        <span class="rozwin">rozwi&#324;</span>
+                                    </td>
+                                    <td>
+                                        <span class="time">05:30</span><input type="hidden" value="19.01.25" />
+                                        <div class="prognosis-480" style="display: none">
+                                        </div>
+                                    </td>
+                                    <td class="sqResMOT">
+                                        <div class="wrapp">
+                                            <a href="/pl/ti?trainlink=35130/317508/393182/184881/55&ld=mobil&amp;&amp;input=5100641&amp;boardType=dep&amp;time=23:59&amp;maxJourneys=10&amp;dateBegin=&amp;dateEnd=&amp;selectDate=&amp;productsFilter=1111&amp;dirInput=&amp;backLink=sq&amp;"><img src="/hafas-res/img/ar_pic.gif" width="28" height="30" alt="AR 50840" class="transport-type"> <span class="train-name">AR 50840</span><br /><span class="details-left-label">ZOBACZ PE&#321;N&#260; TRAS&#280;</span></a>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="bold">
+                                            <a href="/pl/sq?ld=mobil&amp;input=5100005&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                                Bydgoszcz G&#322;&#243;wna
+                                            </a>
+                                        </span>
+                                        <br>
+                                        <a href="/pl/sq?ld=mobil&amp;input=5100641&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Bydgoszcz Politechnika
+                                        </a>
+                                        05:30
+                                        -
+                                        <a href="/pl/sq?ld=mobil&amp;input=5100644&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Bydgoszcz Brdyuj&#347;cie
+                                        </a>
+                                        05:33
+                                        -
+                                        <a href="/pl/sq?ld=mobil&amp;input=5100648&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Bydgoszcz Wsch&#243;d
+                                        </a>
+                                        05:37
+                                        -
+                                        <a href="/pl/sq?ld=mobil&amp;input=5100642&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Bydgoszcz Bielawy
+                                        </a>
+                                        05:40
+                                        -
+                                        <a href="/pl/sq?ld=mobil&amp;input=5100647&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Bydgoszcz Le&#347;na
+                                        </a>
+                                        05:43
+                                        -
+                                        <a href="/pl/sq?ld=mobil&amp;input=5100005&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Bydgoszcz G&#322;&#243;wna
+                                        </a>
+                                        05:49
+                                    </td>
+                                    <td>
+                                        I/1<br>
+                                        &nbsp;
+                                    </td>
+                                    <td class="superhide"></td>
+                                </tr>
+                                <tr class="even">
+                                    <td>
+                                        <span class="footable-toggle"></span>
+                                        <span class="zwin">zwi&#324;</span>
+                                        <span class="rozwin">rozwi&#324;</span>
+                                    </td>
+                                    <td>
+                                        <span class="time">07:47</span><input type="hidden" value="19.01.25" />
+                                        <div class="prognosis-480" style="display: none">
+                                        </div>
+                                    </td>
+                                    <td class="sqResMOT">
+                                        <div class="wrapp">
+                                            <a href="/pl/ti?trainlink=635355/517619/749964/163197/55&ld=mobil&amp;&amp;input=5100641&amp;boardType=dep&amp;time=23:59&amp;maxJourneys=10&amp;dateBegin=&amp;dateEnd=&amp;selectDate=&amp;productsFilter=1111&amp;dirInput=&amp;backLink=sq&amp;"><img src="/hafas-res/img/ar_pic.gif" width="28" height="30" alt="AR 50882" class="transport-type"> <span class="train-name">AR 50882</span><br /><span class="details-left-label">ZOBACZ PE&#321;N&#260; TRAS&#280;</span></a>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="bold">
+                                            <a href="/pl/sq?ld=mobil&amp;input=5100761&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                                Che&#322;m&#380;a
+                                            </a>
+                                        </span>
+                                        <br>
+                                        <a href="/pl/sq?ld=mobil&amp;input=5100641&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Bydgoszcz Politechnika
+                                        </a>
+                                        07:47
+                                        -
+                                        <a href="/pl/sq?ld=mobil&amp;input=5100646&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Bydgoszcz Fordon
+                                        </a>
+                                        07:49
+                                        -
+                                        <a href="/pl/sq?ld=mobil&amp;input=5102578&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Ostromecko
+                                        </a>
+                                        07:55
+                                        -
+                                        <a href="/pl/sq?ld=mobil&amp;input=5100878&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            D&#261;browa Che&#322;mi&#324;ska
+                                        </a>
+                                        08:01
+                                        &#8226;
+                                        <a href="/pl/sq?ld=mobil&amp;input=5101323&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Gzin
+                                        </a>
+                                        08:06
+                                        -
+                                        <a href="/pl/sq?ld=mobil&amp;input=5103907&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Unis&#322;aw Pomorski
+                                        </a>
+                                        08:12
+                                        -
+                                        <a href="/pl/sq?ld=mobil&amp;input=5101318&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Grzybno
+                                        </a>
+                                        08:17
+                                        -
+                                        <a href="/pl/sq?ld=mobil&amp;input=5102504&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Nawra
+                                        </a>
+                                        08:20
+                                        -
+                                        <a href="/pl/sq?ld=mobil&amp;input=5101095&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            G&#322;uchowo
+                                        </a>
+                                        08:24
+                                        -
+                                        <a href="/pl/sq?ld=mobil&amp;input=5100761&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Che&#322;m&#380;a
+                                        </a>
+                                        08:31
+                                    </td>
+                                    <td>
+                                        I/1<br>
+                                        &nbsp;
+                                    </td>
+                                    <td class="superhide"></td>
+                                </tr>
+                                <tr class="odd">
+                                    <td>
+                                        <span class="footable-toggle"></span>
+                                        <span class="zwin">zwi&#324;</span>
+                                        <span class="rozwin">rozwi&#324;</span>
+                                    </td>
+                                    <td>
+                                        <span class="time">09:19</span><input type="hidden" value="19.01.25" />
+                                        <div class="prognosis-480" style="display: none">
+                                        </div>
+                                    </td>
+                                    <td class="sqResMOT">
+                                        <div class="wrapp">
+                                            <a href="/pl/ti?trainlink=861846/593185/667570/46503/55&ld=mobil&amp;&amp;input=5100641&amp;boardType=dep&amp;time=23:59&amp;maxJourneys=10&amp;dateBegin=&amp;dateEnd=&amp;selectDate=&amp;productsFilter=1111&amp;dirInput=&amp;backLink=sq&amp;"><img src="/hafas-res/img/ar_pic.gif" width="28" height="30" alt="AR 50955" class="transport-type"> <span class="train-name">AR 50955</span><br /><span class="details-left-label">ZOBACZ PE&#321;N&#260; TRAS&#280;</span></a>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="bold">
+                                            <a href="/pl/sq?ld=mobil&amp;input=5100005&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                                Bydgoszcz G&#322;&#243;wna
+                                            </a>
+                                        </span>
+                                        <br>
+                                        <a href="/pl/sq?ld=mobil&amp;input=5100641&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Bydgoszcz Politechnika
+                                        </a>
+                                        09:19
+                                        -
+                                        <a href="/pl/sq?ld=mobil&amp;input=5100644&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Bydgoszcz Brdyuj&#347;cie
+                                        </a>
+                                        09:21
+                                        -
+                                        <a href="/pl/sq?ld=mobil&amp;input=5100648&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Bydgoszcz Wsch&#243;d
+                                        </a>
+                                        09:25
+                                        -
+                                        <a href="/pl/sq?ld=mobil&amp;input=5100642&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Bydgoszcz Bielawy
+                                        </a>
+                                        09:28
+                                        -
+                                        <a href="/pl/sq?ld=mobil&amp;input=5100647&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Bydgoszcz Le&#347;na
+                                        </a>
+                                        09:31
+                                        -
+                                        <a href="/pl/sq?ld=mobil&amp;input=5100005&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Bydgoszcz G&#322;&#243;wna
+                                        </a>
+                                        09:37
+                                    </td>
+                                    <td>
+                                        I/1<br>
+                                        &nbsp;
+                                    </td>
+                                    <td class="superhide"></td>
+                                </tr>
+                                <tr class="even">
+                                    <td>
+                                        <span class="footable-toggle"></span>
+                                        <span class="zwin">zwi&#324;</span>
+                                        <span class="rozwin">rozwi&#324;</span>
+                                    </td>
+                                    <td>
+                                        <span class="time">12:19</span><input type="hidden" value="19.01.25" />
+                                        <div class="prognosis-480" style="display: none">
+                                        </div>
+                                    </td>
+                                    <td class="sqResMOT">
+                                        <div class="wrapp">
+                                            <a href="/pl/ti?trainlink=352092/423202/668676/216974/55&ld=mobil&amp;&amp;input=5100641&amp;boardType=dep&amp;time=23:59&amp;maxJourneys=10&amp;dateBegin=&amp;dateEnd=&amp;selectDate=&amp;productsFilter=1111&amp;dirInput=&amp;backLink=sq&amp;"><img src="/hafas-res/img/ar_pic.gif" width="28" height="30" alt="AR 50886" class="transport-type"> <span class="train-name">AR 50886</span><br /><span class="details-left-label">ZOBACZ PE&#321;N&#260; TRAS&#280;</span></a>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="bold">
+                                            <a href="/pl/sq?ld=mobil&amp;input=5100761&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                                Che&#322;m&#380;a
+                                            </a>
+                                        </span>
+                                        <br>
+                                        <a href="/pl/sq?ld=mobil&amp;input=5100641&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Bydgoszcz Politechnika
+                                        </a>
+                                        12:19
+                                        -
+                                        <a href="/pl/sq?ld=mobil&amp;input=5100646&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Bydgoszcz Fordon
+                                        </a>
+                                        12:21
+                                        -
+                                        <a href="/pl/sq?ld=mobil&amp;input=5102578&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Ostromecko
+                                        </a>
+                                        12:27
+                                        -
+                                        <a href="/pl/sq?ld=mobil&amp;input=5100878&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            D&#261;browa Che&#322;mi&#324;ska
+                                        </a>
+                                        12:33
+                                        &#8226;
+                                        <a href="/pl/sq?ld=mobil&amp;input=5101323&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Gzin
+                                        </a>
+                                        12:38
+                                        -
+                                        <a href="/pl/sq?ld=mobil&amp;input=5103907&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Unis&#322;aw Pomorski
+                                        </a>
+                                        12:44
+                                        -
+                                        <a href="/pl/sq?ld=mobil&amp;input=5101318&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Grzybno
+                                        </a>
+                                        12:49
+                                        -
+                                        <a href="/pl/sq?ld=mobil&amp;input=5102504&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Nawra
+                                        </a>
+                                        12:52
+                                        -
+                                        <a href="/pl/sq?ld=mobil&amp;input=5101095&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            G&#322;uchowo
+                                        </a>
+                                        12:56
+                                        -
+                                        <a href="/pl/sq?ld=mobil&amp;input=5100761&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Che&#322;m&#380;a
+                                        </a>
+                                        13:03
+                                    </td>
+                                    <td>
+                                        I/1<br>
+                                        &nbsp;
+                                    </td>
+                                    <td class="superhide"></td>
+                                </tr>
+                                <tr class="odd">
+                                    <td>
+                                        <span class="footable-toggle"></span>
+                                        <span class="zwin">zwi&#324;</span>
+                                        <span class="rozwin">rozwi&#324;</span>
+                                    </td>
+                                    <td>
+                                        <span class="time">14:21</span><input type="hidden" value="19.01.25" />
+                                        <div class="prognosis-480" style="display: none">
+                                        </div>
+                                    </td>
+                                    <td class="sqResMOT">
+                                        <div class="wrapp">
+                                            <a href="/pl/ti?trainlink=818235/578654/396314/74588/55&ld=mobil&amp;&amp;input=5100641&amp;boardType=dep&amp;time=23:59&amp;maxJourneys=10&amp;dateBegin=&amp;dateEnd=&amp;selectDate=&amp;productsFilter=1111&amp;dirInput=&amp;backLink=sq&amp;"><img src="/hafas-res/img/ar_pic.gif" width="28" height="30" alt="AR 50961" class="transport-type"> <span class="train-name">AR 50961</span><br /><span class="details-left-label">ZOBACZ PE&#321;N&#260; TRAS&#280;</span></a>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="bold">
+                                            <a href="/pl/sq?ld=mobil&amp;input=5100005&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                                Bydgoszcz G&#322;&#243;wna
+                                            </a>
+                                        </span>
+                                        <br>
+                                        <a href="/pl/sq?ld=mobil&amp;input=5100641&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Bydgoszcz Politechnika
+                                        </a>
+                                        14:21
+                                        -
+                                        <a href="/pl/sq?ld=mobil&amp;input=5100644&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Bydgoszcz Brdyuj&#347;cie
+                                        </a>
+                                        14:23
+                                        -
+                                        <a href="/pl/sq?ld=mobil&amp;input=5100648&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Bydgoszcz Wsch&#243;d
+                                        </a>
+                                        14:27
+                                        -
+                                        <a href="/pl/sq?ld=mobil&amp;input=5100642&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Bydgoszcz Bielawy
+                                        </a>
+                                        14:30
+                                        -
+                                        <a href="/pl/sq?ld=mobil&amp;input=5100647&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Bydgoszcz Le&#347;na
+                                        </a>
+                                        14:33
+                                        -
+                                        <a href="/pl/sq?ld=mobil&amp;input=5100005&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Bydgoszcz G&#322;&#243;wna
+                                        </a>
+                                        14:39
+                                    </td>
+                                    <td>
+                                        I/1<br>
+                                        &nbsp;
+                                    </td>
+                                    <td class="superhide"></td>
+                                </tr>
+                                <tr class="even">
+                                    <td>
+                                        <span class="footable-toggle"></span>
+                                        <span class="zwin">zwi&#324;</span>
+                                        <span class="rozwin">rozwi&#324;</span>
+                                    </td>
+                                    <td>
+                                        <span class="time">16:01</span><input type="hidden" value="19.01.25" />
+                                        <div class="prognosis-480" style="display: none">
+                                        </div>
+                                    </td>
+                                    <td class="sqResMOT">
+                                        <div class="wrapp">
+                                            <a href="/pl/ti?trainlink=303198/406910/568902/183385/55&ld=mobil&amp;&amp;input=5100641&amp;boardType=dep&amp;time=23:59&amp;maxJourneys=10&amp;dateBegin=&amp;dateEnd=&amp;selectDate=&amp;productsFilter=1111&amp;dirInput=&amp;backLink=sq&amp;"><img src="/hafas-res/img/ar_pic.gif" width="28" height="30" alt="AR 50890" class="transport-type"> <span class="train-name">AR 50890</span><br /><span class="details-left-label">ZOBACZ PE&#321;N&#260; TRAS&#280;</span></a>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="bold">
+                                            <a href="/pl/sq?ld=mobil&amp;input=5100761&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                                Che&#322;m&#380;a
+                                            </a>
+                                        </span>
+                                        <br>
+                                        <a href="/pl/sq?ld=mobil&amp;input=5100641&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Bydgoszcz Politechnika
+                                        </a>
+                                        16:01
+                                        -
+                                        <a href="/pl/sq?ld=mobil&amp;input=5100646&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Bydgoszcz Fordon
+                                        </a>
+                                        16:03
+                                        -
+                                        <a href="/pl/sq?ld=mobil&amp;input=5102578&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Ostromecko
+                                        </a>
+                                        16:09
+                                        -
+                                        <a href="/pl/sq?ld=mobil&amp;input=5100878&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            D&#261;browa Che&#322;mi&#324;ska
+                                        </a>
+                                        16:15
+                                        &#8226;
+                                        <a href="/pl/sq?ld=mobil&amp;input=5101323&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Gzin
+                                        </a>
+                                        16:20
+                                        -
+                                        <a href="/pl/sq?ld=mobil&amp;input=5103907&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Unis&#322;aw Pomorski
+                                        </a>
+                                        16:26
+                                        -
+                                        <a href="/pl/sq?ld=mobil&amp;input=5101318&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Grzybno
+                                        </a>
+                                        16:31
+                                        -
+                                        <a href="/pl/sq?ld=mobil&amp;input=5102504&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Nawra
+                                        </a>
+                                        16:34
+                                        -
+                                        <a href="/pl/sq?ld=mobil&amp;input=5101095&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            G&#322;uchowo
+                                        </a>
+                                        16:38
+                                        -
+                                        <a href="/pl/sq?ld=mobil&amp;input=5100761&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Che&#322;m&#380;a
+                                        </a>
+                                        16:45
+                                    </td>
+                                    <td>
+                                        I/1<br>
+                                        &nbsp;
+                                    </td>
+                                    <td class="superhide"></td>
+                                </tr>
+                                <tr class="odd">
+                                    <td>
+                                        <span class="footable-toggle"></span>
+                                        <span class="zwin">zwi&#324;</span>
+                                        <span class="rozwin">rozwi&#324;</span>
+                                    </td>
+                                    <td>
+                                        <span class="time">17:39</span><input type="hidden" value="19.01.25" />
+                                        <div class="prognosis-480" style="display: none">
+                                        </div>
+                                    </td>
+                                    <td class="sqResMOT">
+                                        <div class="wrapp">
+                                            <a href="/pl/ti?trainlink=638910/518885/525508/49784/55&ld=mobil&amp;&amp;input=5100641&amp;boardType=dep&amp;time=23:59&amp;maxJourneys=10&amp;dateBegin=&amp;dateEnd=&amp;selectDate=&amp;productsFilter=1111&amp;dirInput=&amp;backLink=sq&amp;"><img src="/hafas-res/img/ar_pic.gif" width="28" height="30" alt="AR 50965" class="transport-type"> <span class="train-name">AR 50965</span><br /><span class="details-left-label">ZOBACZ PE&#321;N&#260; TRAS&#280;</span></a>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="bold">
+                                            <a href="/pl/sq?ld=mobil&amp;input=5100005&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                                Bydgoszcz G&#322;&#243;wna
+                                            </a>
+                                        </span>
+                                        <br>
+                                        <a href="/pl/sq?ld=mobil&amp;input=5100641&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Bydgoszcz Politechnika
+                                        </a>
+                                        17:39
+                                        -
+                                        <a href="/pl/sq?ld=mobil&amp;input=5100644&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Bydgoszcz Brdyuj&#347;cie
+                                        </a>
+                                        17:41
+                                        -
+                                        <a href="/pl/sq?ld=mobil&amp;input=5100648&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Bydgoszcz Wsch&#243;d
+                                        </a>
+                                        17:45
+                                        -
+                                        <a href="/pl/sq?ld=mobil&amp;input=5100642&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Bydgoszcz Bielawy
+                                        </a>
+                                        17:48
+                                        -
+                                        <a href="/pl/sq?ld=mobil&amp;input=5100647&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Bydgoszcz Le&#347;na
+                                        </a>
+                                        17:51
+                                        -
+                                        <a href="/pl/sq?ld=mobil&amp;input=5100005&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Bydgoszcz G&#322;&#243;wna
+                                        </a>
+                                        17:57
+                                    </td>
+                                    <td>
+                                        I/1<br>
+                                        &nbsp;
+                                    </td>
+                                    <td class="superhide"></td>
+                                </tr>
+                                <tr class="even">
+                                    <td>
+                                        <span class="footable-toggle"></span>
+                                        <span class="zwin">zwi&#324;</span>
+                                        <span class="rozwin">rozwi&#324;</span>
+                                    </td>
+                                    <td>
+                                        <span class="time">19:03</span><input type="hidden" value="19.01.25" />
+                                        <div class="prognosis-480" style="display: none">
+                                        </div>
+                                    </td>
+                                    <td class="sqResMOT">
+                                        <div class="wrapp">
+                                            <a href="/pl/ti?trainlink=86844/334795/839304/390704/55&ld=mobil&amp;&amp;input=5100641&amp;boardType=dep&amp;time=23:59&amp;maxJourneys=10&amp;dateBegin=&amp;dateEnd=&amp;selectDate=&amp;productsFilter=1111&amp;dirInput=&amp;backLink=sq&amp;"><img src="/hafas-res/img/ar_pic.gif" width="28" height="30" alt="AR 50892" class="transport-type"> <span class="train-name">AR 50892</span><br /><span class="details-left-label">ZOBACZ PE&#321;N&#260; TRAS&#280;</span></a>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="bold">
+                                            <a href="/pl/sq?ld=mobil&amp;input=5100062&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                                Toru&#324; G&#322;&#243;wny
+                                            </a>
+                                        </span>
+                                        <br>
+                                        <a href="/pl/sq?ld=mobil&amp;input=5100641&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Bydgoszcz Politechnika
+                                        </a>
+                                        19:03
+                                        -
+                                        <a href="/pl/sq?ld=mobil&amp;input=5100646&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Bydgoszcz Fordon
+                                        </a>
+                                        19:05
+                                        -
+                                        <a href="/pl/sq?ld=mobil&amp;input=5102578&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Ostromecko
+                                        </a>
+                                        19:11
+                                        -
+                                        <a href="/pl/sq?ld=mobil&amp;input=5100878&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            D&#261;browa Che&#322;mi&#324;ska
+                                        </a>
+                                        19:17
+                                        &#8226;
+                                        <a href="/pl/sq?ld=mobil&amp;input=5100761&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Che&#322;m&#380;a
+                                        </a>
+                                        19:46
+                                        -
+                                        <a href="/pl/sq?ld=mobil&amp;input=5101315&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Grzywna
+                                        </a>
+                                        19:49
+                                        -
+                                        <a href="/pl/sq?ld=mobil&amp;input=5102626&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Ostaszewo Toru&#324;skie
+                                        </a>
+                                        19:55
+                                        -
+                                        <a href="/pl/sq?ld=mobil&amp;input=5103812&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Toru&#324; Wschodni
+                                        </a>
+                                        20:06
+                                        -
+                                        <a href="/pl/sq?ld=mobil&amp;input=5103810&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Toru&#324; Miasto
+                                        </a>
+                                        20:10
+                                        -
+                                        <a href="/pl/sq?ld=mobil&amp;input=5100062&amp;boardType=dep&amp;date=18.01.25&amp;dateStart=18.01.25
+&amp;GUIREQProduct_0=on
+&amp;GUIREQProduct_1=on
+&amp;GUIREQProduct_2=on
+&amp;GUIREQProduct_3=on
+&amp;dateEnd=&amp;REQ0JourneyDate=18.01.25&amp;time=23:00&amp;REQ0JourneyTime=&amp;maxJourneys=10&amp;productsFilter=1111&amp;showAdvancedProductMode=yes&amp;start=yes">
+                                            Toru&#324; G&#322;&#243;wny
+                                        </a>
+                                        20:15
+                                    </td>
+                                    <td>
+                                        I/1<br>
+                                        &nbsp;
+                                    </td>
+                                    <td class="superhide"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="system-info">
+                            <span>WSZYSTKIE INFORMACJE UDOST&#280;PNIANE S&#260; ZGODNIE Z <a href="/pl/page/regulamin">REGULAMINEM KORZYSTANIA Z SERWISU</a>.<br />Baza&nbsp;danych&nbsp;&copy;&nbsp;2025&nbsp;<a href="http://www.pkp-informatyka.pl/" style="color:inherit">PKP&nbsp;Informatyka</a>; Op&#243;&#378;nienia:&nbsp;<a href="http://www.plk-sa.pl/" style="color:inherit">PKP&nbsp;PLK</a>; oprogramowanie: Hafas 5.31 &copy;&nbsp;2025&nbsp;<a href="http://www.hacon.de/" lang="de" style="color:inherit">HaCon Ingenieurgesellschaft mbH.</a></span>
+                        </div>
+                    </div>
+
+                </div><!-- col-md-12 -->
+            </div><!-- row results-box -->
+        </div><!-- container -->
+    </div><!-- content results -->
+    <!-- main_adv_btm reklama_dolna (display 1249273) -->
+    <div class="adv adv-center adv-bottom">
+        <div id="main_adv_btm"></div>
+        <script type="text/javascript" src="//static.clickonometrics.pl/_a4a.js"></script>
+        <script type="text/javascript">jQuery(document).ready(function () {
+                if (!window.clickonometricsIsMobile) {
+                    if (typeof window.__tcfapi === "function") {
+                        const callback1249273 = (tcData, success) => {
+                            if (success && tcData.eventStatus === 'useractioncomplete' || tcData.eventStatus === 'tcloaded') {
+                                window.__tcfapi('removeEventListener', 2, () => {
+                                }, tcData.listenerId);
+                                var consentData = '';
+                                if (success) {
+                                    if (tcData.gdprApplies) {
+                                        consentData = tcData.tcString;
+                                    }
+                                    if (consentData == null) {
+                                        return;
+                                    }
+
+                                    var settings = {
+                                        container: 'main_adv_btm',
+                                        keywords: window.adv_keywords,
+                                        gdpr_consent: consentData,
+                                        use_iframe: '1'
+                                    };
+                                    _A4A.construct("https://delivery.clickonometrics.pl");
+                                    _A4A.handle(_A4A.CODE_PLACEMENT, [1249273, settings]);
+
+                                    _A4A.addEventListener('SlotRenderEnded', 1249273,
+                                        function (event) {
+                                            if (!event.hasAd) {
+                                                googletag.cmd.push(function() {  googletag.defineSlot('/52555387,22528334154/rozklad-pkp.pl_sw_970x250_bottom', [[728, 90], [750, 100], [750, 200], [750, 300], []], 'div-gpt-ad-rozklad-pkp.pl_sw_970x250_bottom').addService(googletag.pubads());googletag.enableServices();});
+                                                googletag.cmd.push(function() {
+                                                    googletag.display('div-gpt-ad-rozklad-pkp.pl_sw_970x250_bottom');
+                                                });
+                                            }
+                                        }
+                                    );
+                                }
+                            }
+                        }
+                        window.__tcfapi('addEventListener', 2, callback1249273);
+                    }
+                }
+            });</script>
+        <div id="div-gpt-ad-rozklad-pkp.pl_sw_970x250_bottom"></div>
+    </div>
+
+
+    <!-- ########## CONTENT MAIN ########## -->
+    <!-- ########## FOOTER ########## -->
+
+    <div id="footer">
+        <h2 class="wcag-hide" id="stopka" tabindex="0">Stopka</h2>
+        <div class="container">
+
+            <div class="banners">
+                <div class="col-2">
+
+                    <a href="https://www.pkp.pl/pl/dworce/sklepy-uslugi" class="banner-link banner-link-2" title="WIFI">
+                        <img src="/img/content/banners/shops-services.png" srcset="/img/content/banners/shops-services@2x.png 2x" alt="WIFI" />
+                    </a><!-- banner-link -->
+                    <a href="/pl/page/infolinia-pkp-intercity" class="banner-link banner-link-3" title="CENTRUM OBSŁUGI PASAŻERA">
+                        <img src="/img/content/banners/infoline.png" srcset="/img/content/banners/infoline@2x.png 2x" alt="CENTRUM OBSŁUGI PASAŻERA" />
+                    </a>
+
+                    <!-- iBILLBOARD Ad Server one2many Placement: go.pl.bbelements.com Rozklad PKP(25050) / Wyniki Wyszukiwania(2) / Box(1) / Box(3)-->
+                    <!-- HowTo: Place this code into the html page where the ad should appear. -->
+                    <div id='bmone2n-25050.2.1.3' class="show-960 botsmalad">
+                        <!-- <noscript><div style='display:inline'><a href='//go.pl.bbelements.com/please/redirect/25050/2/1/3/'><img src='//go.pl.bbelements.com/please/showit/25050/2/1/3/?typkodu=img&keywords=' style='border-width:0' alt='' /></a></div></noscript> -->
+                    </div>
+
+
+                </div><!-- col-2 -->
+                <div class="col-1">
+                    <a href="http://www.bilkom.pl" lang="pl" class="banner-link banner-link-1">
+                        <img src="/img/content/banners/bilkom.png" srcset="/img/content/banners/bilkom@2x.png 2x" lang="pl" class="banner-1 banner-1-pl" alt="MOBILNY ROZKŁAD JAZDY" />
+                        <img src="/img/content/banners/bilkom.png" srcset="/img/content/banners/bilkom@2x.png 2x" lang="de" class="banner-1 banner-1-de" alt="Bilkom Personlicher Zugfahrplan" />
+                        <img src="/img/content/banners/bilkom.png" srcset="/img/content/banners/bilkom@2x.png 2x" lang="en" class="banner-1 banner-1-en" alt="Personal Train Timetable Navigator" />
+                        <img src="/img/content/banners/bilkom.png" srcset="/img/content/banners/bilkom@2x.png 2x" lang="ru" class="banner-1 banner-1-ru" alt="МОБИЛЬНЫЕ АППЛИКАЦИИ" />
+                    </a><!-- banner-link -->
+                </div><!-- col-1 -->
+            </div><!-- row banners -->
+
+            <div class="footer footer--table">
+                <ul class="wcag-flat">
+                    <li class="footer-copy">
+                        <span class="ft-wrapp"><span>© 2025&nbsp;</span> <a href="http://www.pkp-informatyka.pl/"><span>PKP&nbsp;Informatyka</span></a> <span>&nbsp;&amp;&nbsp;</span> <a href="http://www.pkp.pl"><span>PKP S.A.</span></a></span></span>
+                    </li>
+                    <li class="hidden-xs-to">
+                        <a href="/pl/page/regulamin" class="ft-item hidden-xs">REGULAMIN</a>
+                    </li>
+                    <li class="hidden-xs-to">
+                        <a href="/pl/page/prywatnosc" class="ft-item hidden-xs">POLITYKA PRYWATNOŚCI</a>
+                    </li>
+                    <li class="hidden-xs-to">
+                        <a href="http://www.pkp.pl/pl/firma-reklama/reklama-w-internecie" class="ft-item hidden-xs" target="_blank"><span class="wcag-hide">otwarcie w nowym oknie</span>OFERTA REKLAMOWA</a>
+                    </li>
+                    <li class="hidden-xs-to">
+                        <a href="/pl/manual" class="ft-item hidden-xs upcase">Pomoc</a>
+                    </li>
+                    <li class="hidden-xs-to">
+                        <span class="ft-item hidden-xs">AKTUALIZACJA (18.01.2025)</span>
+                    </li>
+                    <li class="go-top-wrapper">
+                        <button class="go-top">
+                            <img src="/img/content/icons/arrow-up-4.png" class="center" alt="Początek strony" />
+                        </button>
+                    </li>
+                </ul>
+
+
+
+
+
+            </div><!-- row footer -->
+
+
+        </div><!-- container -->
+    </div><!-- footer -->
+
+
+
+    <div id="the-stuff-container"></div>
+
+    <!-- things that must happen after document is loaded -->
+    <script src="/js/app_bodyend.min.js?r=625"></script>
+
+    <!-- end -->
+    <!-- /.cookies -->
+    <!-- ########## FOOTER ########## -->
+    <!-- GEMIUS -->
+    <!-- (C) 2000-2009 Gemius SA - gemiusAudience / ver 11.1 / pp.rozklad-pkp.pl / strona_glowna_serwisu-->
+    <script type="text/javascript"><!--//--><![CDATA[//><!--
+	var pp_gemius_identifier ='d12aCMrB25YDteKnBZI2UKQOLb7GJ2bpvjYi7KAcBuv.37';
+	//--><!]]></script>
+    <script type="text/javascript" src="//gapl.hit.gemius.pl/xgemius.js"></script>
+
+    <script type="text/javascript" src="//advice.hit.gemius.pl/pp_gemius.js"></script>
+    <!-- //GEMIUS -->
+
+
+    <script type="text/javascript">//<![CDATA[
+		// var from_city = null;
+		var to_city = null;
+		// var adv_date = null;
+		window.adv_keywords = [];
+		// if (jQuery('input#from-station')[0])
+		// 	from_city = window.removeDiacritics(jQuery('input#from-station').attr('placeholder'));
+		if (jQuery('input#to-station')[0])
+			to_city = window.removeDiacritics(jQuery('input#to-station').attr('placeholder'));
+
+		if (to_city !== undefined && to_city !== null)
+			to_city = to_city.toLocaleLowerCase().replace(/\-$/, '');
+		// if (jQuery('input[name="date"]')[0])
+		// {
+		// 	adv_date_raw = jQuery('input[name="date"]').val();
+		// 	subs = adv_date_raw.split('.');
+		// 	if (subs[2] !== undefined)
+		// 		adv_date = '20'+subs[2]+'-'+subs[1]+'-'+subs[0];
+		// }
+		// if (from_city && to_city && adv_date)
+		if (to_city)
+		{
+			window.adv_keywords = [
+				// from_city,
+				to_city
+				// 'z '+from_city,
+				// 'do '+to_city,
+				// 'od '+adv_date
+			];
+			// if (jQuery('.info_departure_eva_id').length)
+			// 	adv_keywords.push(jQuery('.info_departure_eva_id').val().substr(2, 2));
+			// if (jQuery('.info_arrival_eva_id').length)
+			// 	adv_keywords.push(jQuery('.info_arrival_eva_id').val().substr(2, 2));
+		}</script>
+
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>
