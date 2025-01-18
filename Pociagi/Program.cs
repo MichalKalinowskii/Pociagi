@@ -1,11 +1,7 @@
 ﻿using HtmlAgilityPack;
-using System;
-using System.Collections.Generic;
 using System.Net;
-using System.Net.Http;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
-using System.Threading.Tasks;
 
 namespace Pociagi
 {
@@ -15,15 +11,26 @@ namespace Pociagi
         {
             var trainScheduleObservable = CreateTrainScheduleObservable();
 
-            do { 
-                await trainScheduleObservable
-                    .Do(schedule => Console.WriteLine($"Pociąg: {schedule.TrainName}, Czas: {schedule.Time}, Kierunek: {schedule.Direction}, Rozkład: {schedule.Schedule}"))
-                    .ToList()
-                    .ToTask();
-                Console.WriteLine("\n#########################################\n");
-                Thread.Sleep(30000);
+            var interval = Observable.Interval(TimeSpan.FromSeconds(30));
 
-            } while (true);
+            await Observer(trainScheduleObservable);
+            Console.WriteLine("\n#########################################\n");
+
+            interval.Subscribe(async observer => 
+            {
+                await Observer(trainScheduleObservable);
+                Console.WriteLine("\n#########################################\n");
+            });
+
+            await Task.Delay(Timeout.Infinite);
+        }
+
+        private static async Task Observer(IObservable<TrainSchedule> trainScheduleObservable)
+        {
+            await trainScheduleObservable
+                .Do(schedule => Console.WriteLine($"Pociąg: {schedule.TrainName}, Czas: {schedule.Time}, Kierunek: {schedule.Direction}, Rozkład: {schedule.Schedule}\n"))
+                .ToList()
+                .ToTask();
         }
 
         private static IObservable<TrainSchedule> CreateTrainScheduleObservable()
@@ -48,7 +55,7 @@ namespace Pociagi
                         var oddSchedules = DecodeRows(oddRows);
                         var evenSchedules = DecodeRows(evenRows);
 
-                        return oddSchedules.Concat(evenSchedules);
+                        return oddSchedules.Concat(evenSchedules).OrderBy(x => x.Time);
                     })
             );
         }
